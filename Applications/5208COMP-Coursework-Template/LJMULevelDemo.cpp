@@ -29,6 +29,7 @@
 #include "MaterialGeneratorDX11.h"
 
 #include "FirstPersonCamera.h"
+#include "../../Source/Objects/TextActor.h"
 
 //Add a Using Directive to avoid typing Glyph3 for basic constructs
 using namespace Glyph3;
@@ -78,73 +79,101 @@ void LJMULevelDemo::inputAssemblyStage()
 														Vector3f(1.0f, 0.0f, 0.0f),
 														Vector3f(0.0f, 0.0f, -1.0f),
 														Vector2f(m_platformWidth, m_platformLength));
-		m_platformActor->UseSolidMaterial();
-		m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
+	m_platformActor->UseSolidMaterial();
+	m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 
-		this->m_pScene->AddActor(m_platformActor);
+	this->m_pScene->AddActor(m_platformActor);
 
-		PointLight* tlight = new PointLight();
-		tlight->GetSpecular() = Vector4f(1.2f, 1.2f, 1.2, 1);
-		tlight->GetDiffuse() = Vector4f(1.2f, 1.2f, 1.2, 1);
-		tlight->GetAmbient() = Vector4f(1.2f, 1.2f, 1.2, 1);
-		tlight->GetNode()->Position() = Vector3f(-128.0f, 128.0f, -128.0f);
-		m_pScene->AddLight(tlight);
+	PointLight* tlight = new PointLight();
+	tlight->GetSpecular() = Vector4f(1.2f, 1.2f, 1.2, 1);
+	tlight->GetDiffuse() = Vector4f(1.2f, 1.2f, 1.2, 1);
+	tlight->GetAmbient() = Vector4f(1.2f, 1.2f, 1.2, 1);
+	tlight->GetNode()->Position() = Vector3f(-128.0f, 128.0f, -128.0f);
+	m_pScene->AddLight(tlight);
 
-		m_carActor = new GeometryActor();
-		m_carActor->SetColor(Vector4f(0.0f, 1.0f, 0.0f, 1.0f)); //Green
-		m_carActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(4.0f, 8.0f, 12.0f));
-		m_carActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
+	m_carActor = new GeometryActor();
+	m_carActor->SetColor(Vector4f(0.0f, 1.0f, 0.0f, 1.0f)); //Green
+	m_carActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(4.0f, 8.0f, 12.0f));
+	m_carActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 
-		this->m_pScene->AddActor(m_carActor);
+	this->m_pScene->AddActor(m_carActor);
 
-		for (int i = -180; i < 180; i = i + 45)
-		{
-			float x = 200.0f * cos(i * DEG_TO_RAD);
-			float z = 200.0f * sin(i * DEG_TO_RAD);
-			m_checkpoints.push_back(Vector3f(x, 0, z));
-		}
+	for (int i = -180; i < 180; i = i + 2)
+	{
+		float x = 200.0f * cos(i * DEG_TO_RAD);
+		float z = 200.0f * sin(i * DEG_TO_RAD);
+		m_checkpoints.push_back(Vector3f(x, 0, z));
+	}
 
-		for (int i = 0; i < m_checkpoints.size(); i++)
-		{
-			GeometryActor* pathSegmentActor = new GeometryActor();
-			pathSegmentActor->SetColor(Vector4f(1.0f, 0.1f, 0.1f, 1.0f));
-			int startidx = i;
-			int endidx = (i + 1) % m_checkpoints.size();
-			Vector3f cylinderStartPoint = m_checkpoints[startidx] + Vector3f(0, 3, 0);
-			Vector3f cylinderEndPoint = m_checkpoints[endidx] + Vector3f(0, 3, 0);
-			pathSegmentActor->DrawCylinder(cylinderStartPoint, cylinderEndPoint, 0.4f, 0.4f);
-			pathSegmentActor->UseSolidMaterial();
-			pathSegmentActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
-			this->m_pScene->AddActor(pathSegmentActor);
-		}
+	for (int i = 0; i < m_checkpoints.size(); i++)
+	{
+		GeometryActor* pathSegmentActor = new GeometryActor();
+		pathSegmentActor->SetColor(Vector4f(1.0f, 0.1f, 0.1f, 1.0f));
+		int startidx = i;
+		int endidx = (i + 1) % m_checkpoints.size();
+		Vector3f cylinderStartPoint = m_checkpoints[startidx] + Vector3f(0, 3, 0);
+		Vector3f cylinderEndPoint = m_checkpoints[endidx] + Vector3f(0, 3, 0);
+		pathSegmentActor->DrawCylinder(cylinderStartPoint, cylinderEndPoint, 0.4f, 0.4f);
+		pathSegmentActor->UseSolidMaterial();
+		pathSegmentActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
+		this->m_pScene->AddActor(pathSegmentActor);
 
-		m_currentCheckpointIndex = 0;
-		m_nextCheckpointIndex = m_currentCheckpointIndex + 1;
+		float carTextSize = 10.0f;
+		m_carLabelText = new TextActor();
+		m_carLabelText->SetColor(Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+		m_carLabelText->SetText(L"P1");
+		m_carLabelText->SetLineJustification(LineJustification::RIGHT);
+		m_carLabelText->GetNode()->Scale() = Vector3f(1.0f, 1.0f, 1.0f) * carTextSize;
+		this->m_pScene->AddActor(m_carLabelText);
+	}
 
-		Matrix3f tstartRotation;
+	m_currentCheckpointIndex = 0;
+	m_nextCheckpointIndex = m_currentCheckpointIndex + 1;
 
-		m_referenceCarDirection = Vector3f(0, 0, 1);
-		m_currentCarDirection = m_referenceCarDirection;
-		m_targetCarDirection = m_checkpoints[m_nextCheckpointIndex] - m_checkpoints[m_currentCheckpointIndex];
-		m_carDistance2NextCheckpoint = m_targetCarDirection.Magnitude();
-		m_targetCarDirection.Normalize();
+	Matrix3f tstartRotation;
 
-		float angle = acos(m_referenceCarDirection.Dot(m_targetCarDirection));
+	m_referenceCarDirection = Vector3f(0, 0, 1);
+	m_currentCarDirection = m_referenceCarDirection;
+	m_targetCarDirection = m_checkpoints[m_nextCheckpointIndex] - m_checkpoints[m_currentCheckpointIndex];
+	m_carDistance2NextCheckpoint = m_targetCarDirection.Magnitude();
+	m_targetCarDirection.Normalize();
 
-		Vector3f axis = m_referenceCarDirection.Cross(m_targetCarDirection);
-		axis.Normalize();
+	float angle = acos(m_referenceCarDirection.Dot(m_targetCarDirection));
 
-		tstartRotation.RotationEuler(axis, angle);
+	Vector3f axis = m_referenceCarDirection.Cross(m_targetCarDirection);
+	axis.Normalize();
 
-		m_carActor->GetNode()->Rotation() = tstartRotation;
-		m_carActor->GetNode()->Position() = m_checkpoints[m_currentCheckpointIndex];
+	tstartRotation.RotationEuler(axis, angle);
 
-		m_carLinearSpeed = 80.0f;
-		m_carAngularSpeed = 1.5f;
+	m_carActor->GetNode()->Rotation() = tstartRotation;
+	m_carActor->GetNode()->Position() = m_checkpoints[m_currentCheckpointIndex];
 
-		// m_carState = 0 : Car is moving forward
-		// m_carState = 1 : Car is turning around
-		m_carState = 0;
+	m_carLinearSpeed = 80.0f;
+	m_carAngularSpeed = 1.5f;
+
+	// m_carState = 0 : Car is moving forward
+	// m_carState = 1 : Car is turning around
+	m_carState = 0;
+
+	float treetrunklength = 8.0f;
+	float treetrunksize = 1.5f;
+
+	m_treeTrunkActor = new GeometryActor();
+	m_treeTrunkActor->SetColor(Vector4f(0.65f, 0.16f, 0.16f, 1.0f));
+	m_treeTrunkActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, treetrunklength, 1.0f));
+	m_treeTrunkActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
+	m_treeTrunkActor->GetNode()->Scale() = Vector3f(1, 1, 1) * treetrunksize;
+	this->m_pScene->AddActor(m_treeTrunkActor);
+
+	m_treeTopActor = new GeometryActor();
+	m_treeTopActor->SetColor(Vector4f(0.0f, 0.5f, 0.0f, 1.0f));
+	m_treeTopActor->DrawCylinder(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0, 12,0), 6, 0, 5, 20);
+	m_treeTopActor->DrawDisc(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0, -1, 0), 6);
+	m_treeTopActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength, 0.0f);
+	this->m_pScene->AddActor(m_treeTopActor);
+
+	Glyph3::Node3D* treeTopNode = m_treeTopActor->GetNode();
+	m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);
 
 }
 
@@ -199,6 +228,102 @@ void LJMULevelDemo::Update()
 		// hence time per frame is much larger than 10x 60fps
 		tpf = 1 / 60.0f;
 	}
+
+	if (m_carState == 0)
+	{
+		// THE CAR IS TRAVELLING IN A STRAIGHT LINE
+		// calculate the car's target vector (i.e the vector from the car's current position and the
+		// car's next checkpoint) and calculate distance to next checkpoint.
+		// if the car's distance to the next checkpoint is shorter than the previous distance to the next
+		// checkpoint that means the car has reached or passed the checkpoint and needs to turn (change
+		// m_carState to 1).
+		// Otherwise, move the car in the direction of the car's target vector at the specified linear speed
+
+		m_targetCarDirection = m_checkpoints[m_nextCheckpointIndex] - m_carActor->GetNode()->Position();
+		float distance2NextCheckpoint = m_targetCarDirection.Magnitude();
+		m_targetCarDirection.Normalize();
+		m_currentCarDirection = m_targetCarDirection;
+
+		if (distance2NextCheckpoint > m_carDistance2NextCheckpoint)
+		{
+			m_currentCheckpointIndex++;
+			m_nextCheckpointIndex++;
+			m_currentCheckpointIndex = m_currentCheckpointIndex % m_checkpoints.size();
+			m_nextCheckpointIndex = m_nextCheckpointIndex % m_checkpoints.size();
+			m_carActor->GetNode()->Position() = m_checkpoints[m_currentCheckpointIndex];
+
+			m_targetCarDirection = m_checkpoints[m_nextCheckpointIndex] - m_carActor->GetNode()->Position();
+			distance2NextCheckpoint = m_targetCarDirection.Magnitude();
+			m_targetCarDirection.Normalize();
+			
+			float angle = acos(m_currentCarDirection.Dot(m_targetCarDirection));
+			if (angle > m_carAngularSpeed * tpf)
+			{
+				m_carState = 1;
+			}
+		}
+		else
+		{
+			m_carActor->GetNode()->Position() =   m_carActor->GetNode()->Position() + 
+																				m_currentCarDirection * m_carLinearSpeed * tpf;
+			m_carDistance2NextCheckpoint = distance2NextCheckpoint;
+		}
+
+
+	}
+	else
+	{
+		// THE CAR IS TURNING AROUND
+		// Calculate the angle difference between the car's current direction and the car's target direction
+		// using the vectors dot product.
+		// If the angle is less than the increment angle, which is m_carAngularSpeed * tpf, it means the car
+		// is roughly facing the target location. Snap the car's orientation to the target vector and make
+		// the car moving forward in the next frame (change m_carState to 0)
+		// Otherwise, keep turning the car in the direction of the car's target vector at the specified angular speed
+
+		float angle = acos(m_currentCarDirection.Dot(m_targetCarDirection));
+		if (angle < m_carAngularSpeed * tpf)
+		{
+			m_currentCarDirection = m_targetCarDirection;
+			float angle = acos(m_referenceCarDirection.Dot(m_targetCarDirection));
+
+			Vector3f axis = m_referenceCarDirection.Cross(m_currentCarDirection);
+			axis.Normalize();
+
+			Matrix3f tstartRotation;
+			tstartRotation.RotationEuler(axis, angle);
+			m_carActor->GetNode()->Rotation() = tstartRotation;
+
+			m_targetCarDirection = m_checkpoints[m_nextCheckpointIndex] - m_carActor->GetNode()->Position();
+			m_carDistance2NextCheckpoint = m_targetCarDirection.Magnitude();
+
+			m_carState = 0;
+		}
+		else
+		{
+
+			m_carActor->GetNode()->Position() = m_carActor->GetNode()->Position() +
+				m_currentCarDirection * m_carLinearSpeed * tpf;
+
+			angle = angle + m_carAngularSpeed * tpf;
+			Vector3f axis = m_currentCarDirection.Cross(m_targetCarDirection);
+			axis.Normalize();
+
+			Matrix3f tstartRotation;
+			tstartRotation.RotationEuler(axis, m_carAngularSpeed * tpf);
+			m_carActor->GetNode()->Rotation() *= tstartRotation;
+			m_currentCarDirection = m_carActor->GetNode()->Rotation() * m_referenceCarDirection;
+			m_currentCarDirection.Normalize();
+		}
+	}
+
+	// Updating text above car
+	m_carLabelText->GetNode()->Position() = m_carActor->GetNode()->Position() + Vector3f(-5, 20, 0);
+
+	// Rotating   t r e e
+	Matrix3f trotation;
+	trotation.RotationZ(tpf);
+	m_treeTrunkActor->GetNode()->Rotation() *= trotation;
 
 	//----------START RENDERING--------------------------------------------------------------
 

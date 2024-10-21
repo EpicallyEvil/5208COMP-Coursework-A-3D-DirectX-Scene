@@ -19,6 +19,11 @@
 //LJMU Framework Includes
 #include "LJMUTextOverlay.h"
 
+namespace Glyph3
+{
+	class TextActor;
+}
+
 using namespace Glyph3;
 
 namespace LJMUDX
@@ -94,11 +99,17 @@ namespace LJMUDX
 		Vector3f m_targetCarDirection;
 		float m_carDistance2NextCheckpoint;
 
+		// Car State and speed for moving/turning
 		int m_carState;
 		float m_carLinearSpeed; 
 		float m_carAngularSpeed;
 
+		// Text above car
+		TextActor* m_carLabelText;
 
+		//Tree
+		GeometryActor* m_treeTrunkActor;
+		GeometryActor* m_treeTopActor;
 
 
 	};

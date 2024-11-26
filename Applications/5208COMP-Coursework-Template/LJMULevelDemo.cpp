@@ -1,7 +1,7 @@
 //------------Include the Application Header File----------------------------
 #include "LJMULevelDemo.h"
 
-//Test
+//Test 2
 //------------DX TK AND STD/STL Includes-------------------------------------
 #include <sstream>
 
@@ -98,7 +98,7 @@ void LJMULevelDemo::inputAssemblyStage()
 
 	this->m_pScene->AddActor(m_carActor);
 
-	for (int i = -180; i < 180; i = i + 2)
+	for (int i = -180; i < 180; i = i + 45)
 	{
 		float x = 200.0f * cos(i * DEG_TO_RAD);
 		float z = 200.0f * sin(i * DEG_TO_RAD);
@@ -301,7 +301,6 @@ void LJMULevelDemo::Update()
 		}
 		else
 		{
-
 			m_carActor->GetNode()->Position() = m_carActor->GetNode()->Position() +
 				m_currentCarDirection * m_carLinearSpeed * tpf;
 

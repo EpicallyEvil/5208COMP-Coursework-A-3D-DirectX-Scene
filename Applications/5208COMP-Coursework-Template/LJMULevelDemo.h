@@ -107,9 +107,13 @@ namespace LJMUDX
 		// Text above car
 		TextActor* m_carLabelText;
 
-		//Tree
+		// Tree Object
 		GeometryActor* m_treeTrunkActor;
 		GeometryActor* m_treeTopActor;
+
+		ResourcePtr m_racetrackTexture;
+		ResourcePtr m_treetrunkTexture;
+		ResourcePtr m_leavesTexture;
 
 
 	};

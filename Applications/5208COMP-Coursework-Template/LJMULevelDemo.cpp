@@ -73,13 +73,16 @@ std::wstring LJMULevelDemo::GetName()
 void LJMULevelDemo::inputAssemblyStage()
 {			
 	//-----SETUP OUR GEOMETRY FOR THIS SCENE-----------------------------------------
+	m_racetrackTexture = RendererDX11::Get()->LoadTexture(L"racetrack.png");
+	m_treetrunkTexture = RendererDX11::Get()->LoadTexture(L"treetrunk.png");
+	m_leavesTexture = RendererDX11::Get()->LoadTexture(L"leaves.png");
 	m_platformActor = new GeometryActor();
 	m_platformActor->SetColor(Vector4f(0.6f, 0.3f, 0.1f, 1.0f));
 	m_platformActor->DrawRect( Vector3f(0.0f, 0.0f, 0.0f),
 														Vector3f(1.0f, 0.0f, 0.0f),
 														Vector3f(0.0f, 0.0f, -1.0f),
 														Vector2f(m_platformWidth, m_platformLength));
-	m_platformActor->UseSolidMaterial();
+	m_platformActor->UseTexturedMaterial(m_racetrackTexture);
 	m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 
 	this->m_pScene->AddActor(m_platformActor);
@@ -98,13 +101,28 @@ void LJMULevelDemo::inputAssemblyStage()
 
 	this->m_pScene->AddActor(m_carActor);
 
-	for (int i = -180; i < 180; i = i + 45)
-	{
-		float x = 200.0f * cos(i * DEG_TO_RAD);
-		float z = 200.0f * sin(i * DEG_TO_RAD);
-		m_checkpoints.push_back(Vector3f(x, 0, z));
-	}
+	//for (int i = -180; i < 180; i = i + 45)
+	//{
+	//	float x = 200.0f * cos(i * DEG_TO_RAD);
+	//	float z = 200.0f * sin(i * DEG_TO_RAD);
+	//	m_checkpoints.push_back(Vector3f(x, 0, z));
+	//}
 
+	const int NumberOfCheckpoints = 6;
+	Vector3f checkpointCoords[NumberOfCheckpoints] = {
+		{-12, 0, -132},
+		{176, 0, -10},
+		{216, 0 , 86},
+		{102, 0 , 174},
+		{-130, 0 , 32},
+		{-134, 0 , -38}
+		};
+
+	for (int i = 0; i < NumberOfCheckpoints; i++)
+	{
+		m_checkpoints.push_back(checkpointCoords[i]);
+	}
+	
 	for (int i = 0; i < m_checkpoints.size(); i++)
 	{
 		GeometryActor* pathSegmentActor = new GeometryActor();
@@ -148,7 +166,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_carActor->GetNode()->Rotation() = tstartRotation;
 	m_carActor->GetNode()->Position() = m_checkpoints[m_currentCheckpointIndex];
 
-	m_carLinearSpeed = 80.0f;
+	m_carLinearSpeed = 40.0f;
 	m_carAngularSpeed = 1.5f;
 
 	// m_carState = 0 : Car is moving forward
@@ -159,14 +177,14 @@ void LJMULevelDemo::inputAssemblyStage()
 	float treetrunksize = 1.5f;
 
 	m_treeTrunkActor = new GeometryActor();
-	m_treeTrunkActor->SetColor(Vector4f(0.65f, 0.16f, 0.16f, 1.0f));
+	m_treeTrunkActor->UseTexturedMaterial(m_treetrunkTexture);
 	m_treeTrunkActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, treetrunklength, 1.0f));
 	m_treeTrunkActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
 	m_treeTrunkActor->GetNode()->Scale() = Vector3f(1, 1, 1) * treetrunksize;
 	this->m_pScene->AddActor(m_treeTrunkActor);
 
 	m_treeTopActor = new GeometryActor();
-	m_treeTopActor->SetColor(Vector4f(0.0f, 0.5f, 0.0f, 1.0f));
+	m_treeTopActor->UseTexturedMaterial(m_leavesTexture);
 	m_treeTopActor->DrawCylinder(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0, 12,0), 6, 0, 5, 20);
 	m_treeTopActor->DrawDisc(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0, -1, 0), 6);
 	m_treeTopActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength, 0.0f);

@@ -1,7 +1,6 @@
 //------------Include the Application Header File----------------------------
 #include "LJMULevelDemo.h"
 
-//Test 2
 //------------DX TK AND STD/STL Includes-------------------------------------
 #include <sstream>
 
@@ -76,13 +75,17 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_racetrackTexture = RendererDX11::Get()->LoadTexture(L"racetrack.png");
 	m_treetrunkTexture = RendererDX11::Get()->LoadTexture(L"treetrunk.png");
 	m_leavesTexture = RendererDX11::Get()->LoadTexture(L"leaves.png");
-	m_platformActor = new GeometryActor();
+	m_platformActor = new LJMUGeometryActor();
 	m_platformActor->SetColor(Vector4f(0.6f, 0.3f, 0.1f, 1.0f));
 	m_platformActor->DrawRect( Vector3f(0.0f, 0.0f, 0.0f),
 														Vector3f(1.0f, 0.0f, 0.0f),
 														Vector3f(0.0f, 0.0f, -1.0f),
 														Vector2f(m_platformWidth, m_platformLength));
-	m_platformActor->UseTexturedMaterial(m_racetrackTexture);
+	//m_platformActor->UseTexturedMaterial(m_racetrackTexture);
+
+	setupMaterialProperties(m_platformActor->m_pLitTexturedMaterial);
+	setLights2Material(m_platformActor->m_pLitTexturedMaterial);
+	m_platformActor->UseLitTexturedMaterial(m_racetrackTexture);
 	m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 
 	this->m_pScene->AddActor(m_platformActor);
@@ -146,7 +149,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	
 	for (int i = 0; i < m_checkpoints.size(); i++)
 	{
-		GeometryActor* pathSegmentActor = new GeometryActor();
+		LJMUGeometryActor* pathSegmentActor = new LJMUGeometryActor();
 		pathSegmentActor->SetColor(Vector4f(1.0f, 0.1f, 0.1f, 1.0f));
 		int startidx = i;
 		int endidx = (i + 1) % m_checkpoints.size();
@@ -221,6 +224,9 @@ void LJMULevelDemo::inputAssemblyStage()
 ////////////////////////////////////
 void LJMULevelDemo::Initialize()
 {
+	// Setup the three light sources parameters
+	setupLightSources();
+
 	//Call the Input Assembly Stage to setup the layout of our Engine Objects
 	this->inputAssemblyStage();
 
@@ -512,4 +518,69 @@ std::wstring LJMULevelDemo::outputFPSInfo()
 	std::wstringstream out;
 	out << L"FPS: " << m_pTimer->Framerate();
 	return out.str();
+}
+
+void LJMULevelDemo::setupLightSources()
+{
+	// Directional Light properties
+	Vector3f directionalLightDir = Vector3f(0.0f, -0.5f, 0.5f);
+	directionalLightDir.Normalize();
+	DirectionalLightDirection = Vector4f(directionalLightDir, 1.0f);
+	DirectionalLightColour = Vector4f(0.002f, 0.002f, 0.002f, 1.0f);
+
+	// Point Light properties
+	PointLightPosition = Vector4f(0.0f, 30.0f, 0.0f, 1.0f);
+	PointLightColour - Vector4f(1.0f, 0.1f, 0.1f, 1.0f);
+	PointLightRange - Vector4f(60.0f, 0.0f, 0.0f, 0.0f);
+	// The range of the point light source is set to 30.0
+	// We only use the first component of the 4D vector because
+	// we cannot just set a scalar number to the GPU
+
+	// Spot Light properties
+	Vector3f spotLightDir = Vector3f(2.0f, -1.0f, 2.0f);
+	spotLightDir.Normalize();
+	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
+	SpotLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+	SpotLightPosition = Vector4f(100.0f, 10.0f, 100.0f, 1.0f);
+	SpotLightRange = Vector4f(150.0f, 0.0f, 0.0f, 0.0f);
+	SpotLightFocus = Vector4f(20.0f, 0.0f, 0.0f, 0.0f);
+	// The focus of the spot light source is set to 10.0
+	// We only use the first component of the 4F vector because
+	// we cannot just send a scalar number to the GPU
+
+}
+
+void LJMULevelDemo::setLights2Material(MaterialPtr material)
+{
+	material->Parameters.SetVectorParameter(L"DirectionalLightColour", DirectionalLightColour);
+	material->Parameters.SetVectorParameter(L"DirectionalLightDirection", DirectionalLightDirection);
+
+	material->Parameters.SetVectorParameter(L"SpotLightColour", SpotLightColour);
+	material->Parameters.SetVectorParameter(L"SpotLightDirection", SpotLightDirection);
+	material->Parameters.SetVectorParameter(L"SpotLightPosition", SpotLightPosition);
+	material->Parameters.SetVectorParameter(L"SpotLightRange", SpotLightRange);
+	material->Parameters.SetVectorParameter(L"SpotLightFocus", SpotLightFocus);
+
+	material->Parameters.SetVectorParameter(L"PointLightColour", PointLightColour);
+	material->Parameters.SetVectorParameter(L"PointLightPosition", PointLightPosition);
+	material->Parameters.SetVectorParameter(L"PointLightRange", PointLightRange);
+}
+
+MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)
+{
+	float ambient_constant = 0.001f;
+	float diffuse_constant = 4.0f;
+	float specular_constant = 0.1f;
+	float shininess_constant = 200.f;
+	Vector4f emmisivity = Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
+
+	material->Parameters.SetVectorParameter(L"SurfaceConstants", Vector4f(
+		ambient_constant,
+		diffuse_constant,
+		specular_constant,
+		shininess_constant));
+
+	material->Parameters.SetVectorParameter(L"SurfaceEmmisiveColour", emmisivity);
+	setLights2Material(material);
+	return material;
 }

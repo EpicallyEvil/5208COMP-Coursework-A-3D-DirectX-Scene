@@ -19,6 +19,8 @@
 //LJMU Framework Includes
 #include "LJMUTextOverlay.h"
 
+#include "LJMUGeometryActor.h"
+
 namespace Glyph3
 {
 	class TextActor;
@@ -74,7 +76,7 @@ namespace LJMUDX
 		ResourcePtr				m_RenderTarget;		//Pointer to the GPU Render Target for Colour
 		ResourcePtr				m_DepthTarget;		//Pointer to the GPU Render Target for Depth
 
-		GeometryActor* m_platformActor;
+		LJMUGeometryActor* m_platformActor;
 
 		float m_platformWidth = 256.0f;
 		float m_platformLength = 256.0f;
@@ -115,6 +117,28 @@ namespace LJMUDX
 		ResourcePtr m_treetrunkTexture;
 		ResourcePtr m_leavesTexture;
 
+		
+		// Variables to store light source properties
+		// 
+		// Directional Light Source only has COLOUR and DIRECTION
+		Vector4f				DirectionalLightColour;
+		Vector4f				DirectionalLightDirection;
+
+		// Point Light Source has POSITION, COLOUR, and RANGE
+		Vector4f				PointLightPosition;
+		Vector4f				PointLightColour;
+		Vector4f				PointLightRange;
+
+		// Spot Light Source has POSITION, COLOUR, RANGE, DIRECTION and FOCUS
+		Vector4f				SpotLightPosition;
+		Vector4f				SpotLightColour;
+		Vector4f				SpotLightRange;
+		Vector4f				SpotLightDirection;
+		Vector4f				SpotLightFocus;
+
+		void setupLightSources();
+		void setLights2Material(MaterialPtr material);
+		MaterialPtr setupMaterialProperties(MaterialPtr material);
 
 	};
 

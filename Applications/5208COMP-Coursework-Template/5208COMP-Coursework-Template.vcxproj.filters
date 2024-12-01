@@ -15,12 +15,18 @@
     <ClCompile Include="LJMUTextOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LJMUGeometryActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LJMULevelDemo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LJMUTextOverlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LJMUGeometryActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -33,6 +33,8 @@
 #include "LJMUMeshOBJ.h"
 #include <FileSystem.h>
 
+#include <SamplerStateConfigDX11.h>
+
 
 //Add a Using Directive to avoid typing Glyph3 for basic constructs
 using namespace Glyph3;
@@ -208,7 +210,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	Vector4f base_colour = Vector4f(1, 1, 1, 1);
 
 	m_carTexture = RendererDX11::Get()->LoadTexture(L"Lamborginhi_Aventador_diffuse.png");
-	BasicMeshPtr car_geometry = this->generateOBJMesh(L"Lamborginhi_Aventador_triangles.obj", base_colour);
+	BasicMeshPtr car_geometry = this->generateOBJMesh(L"Lamborghini_Aventador_triangles.obj", base_colour);
 	MaterialPtr car_material = this->createLitTexturedMaterial();
 
 	setupMaterialProperties(car_material);
@@ -618,7 +620,7 @@ void LJMULevelDemo::applyTexture2Material(MaterialPtr material, ResourcePtr text
 	material->Parameters.SetShaderResourceParameter(L"ColorTexture", texture);
 }
 
-BasicMeshPtr GenerateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour)
+BasicMeshPtr LJMULevelDemo::generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour)
 {
 	FileSystem fs;
 	LJMUMeshOBJ* tmesh = new LJMUMeshOBJ(fs.GetModelsFolder() + pmeshname);
@@ -646,4 +648,51 @@ BasicMeshPtr GenerateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour)
 		}
 	}
 	return tia;
+}
+
+MaterialPtr LJMULevelDemo::createLitTexturedMaterial() {
+
+	RendererDX11* pRenderer = RendererDX11::Get();
+	MaterialPtr material = MaterialPtr(new MaterialDX11());
+
+	// Create and fill the effect that will be used for this view type
+	RenderEffectDX11* pEffect = new RenderEffectDX11();
+
+	pEffect->SetVertexShader(pRenderer->LoadShader(VERTEX_SHADER,
+		std::wstring(L"LJMULitTexture.hlsl"),
+		std::wstring(L"VSMAIN"),
+		std::wstring(L"vs_4_0")));
+
+	pEffect->SetPixelShader(pRenderer->LoadShader(PIXEL_SHADER,
+		std::wstring(L"LJMULitTexture.hlsl"),
+		std::wstring(L"PSMAIN"),
+		std::wstring(L"ps_4_0")));
+
+	RasterizerStateConfigDX11 rsConfig;
+	rsConfig.CullMode = D3D11_CULL_BACK;
+	rsConfig.FillMode = D3D11_FILL_SOLID;
+
+	int rasterizerState = m_pRenderer11->CreateRasterizerState(&rsConfig);
+	if (rasterizerState == -1)
+	{
+		Log::Get().Write(L"Failed to create light rasterizer state");
+		assert(false);
+	}
+
+	pEffect->m_iRasterizerState = rasterizerState;
+
+	SamplerStateConfigDX11 SamplerConfig;
+	SamplerConfig.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+	SamplerConfig.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+	SamplerConfig.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	SamplerConfig.MaxAnisotropy = 16;
+
+	int TextureSampler = RendererDX11::Get()->CreateSamplerState(&SamplerConfig);
+	material->Parameters.SetSamplerParameter(L"TextureSampler", TextureSampler);
+
+	// Enable the material to render the given view type, and set its effect
+	material->Params[VT_PERSPECTIVE].bRender = true;
+	material->Params[VT_PERSPECTIVE].pEffect = pEffect;
+
+	return material;
 }

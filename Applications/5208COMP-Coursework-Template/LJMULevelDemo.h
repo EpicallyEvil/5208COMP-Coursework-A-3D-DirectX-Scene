@@ -147,10 +147,15 @@ namespace LJMUDX
 
 		void applyTexture2Material(MaterialPtr material, ResourcePtr texture);
 
+
 		ResourcePtr m_carTexture;
 		/*Actor* m_carActor;*/
 
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
+
+		MaterialPtr createLitTexturedMaterial();
+
 	};
+
 
 }

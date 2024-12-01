@@ -13,11 +13,13 @@
   <ItemGroup>
     <ClCompile Include="LJMUGeometryActor.cpp" />
     <ClCompile Include="LJMULevelDemo.cpp" />
+    <ClCompile Include="LJMUMeshOBJ.cpp" />
     <ClCompile Include="LJMUTextOverlay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LJMUGeometryActor.h" />
     <ClInclude Include="LJMULevelDemo.h" />
+    <ClInclude Include="LJMUMeshOBJ.h" />
     <ClInclude Include="LJMUTextOverlay.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

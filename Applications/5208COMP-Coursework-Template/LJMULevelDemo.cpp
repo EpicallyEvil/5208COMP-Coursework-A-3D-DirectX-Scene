@@ -30,6 +30,10 @@
 #include "FirstPersonCamera.h"
 #include "../../Source/Objects/TextActor.h"
 
+#include "LJMUMeshOBJ.h"
+#include <FileSystem.h>
+
+
 //Add a Using Directive to avoid typing Glyph3 for basic constructs
 using namespace Glyph3;
 //Include our own application Namespace
@@ -104,42 +108,26 @@ void LJMULevelDemo::inputAssemblyStage()
 
 	this->m_pScene->AddActor(m_carActor);
 
-	//for (int i = -180; i < 180; i = i + 45)
-	//{
-	//	float x = 200.0f * cos(i * DEG_TO_RAD);
-	//	float z = 200.0f * sin(i * DEG_TO_RAD);
-	//	m_checkpoints.push_back(Vector3f(x, 0, z));
-	//}
-
 	const int NumberOfCheckpoints = 18;
 	Vector3f checkpointCoords[NumberOfCheckpoints] = {
 		{101, 0, 176},
 		{194, 0, 139},
 		{206, 0 , 27},
-
 		{125, 0, -40},
 		{13, 0, -114},
 		{-88, 0 , -108},
-
 		{-91, 0, -29},
 		{-9, 0, -12},
 		{101, 0 , 0},
 		{178, 0, 87},
 		{99, 0, 139},
 		{-71, 0 , 33},
-
 		{-138, 0, -55},
 		{-108, 0, -154},
 		{-126, 0 , -195},
 		{-180, 0, -157},
 		{-175, 0, -62},
 		{-130, 0 , 33},
-		//{-12, 0, -132},
-		//{176, 0, -10},
-		////{216, 0 , 86},
-		//{102, 0 , 174},
-		//{-130, 0 , 32},
-		//{-134, 0 , -38}
 		};
 
 	for (int i = 0; i < NumberOfCheckpoints; i++)
@@ -216,6 +204,23 @@ void LJMULevelDemo::inputAssemblyStage()
 
 	Glyph3::Node3D* treeTopNode = m_treeTopActor->GetNode();
 	m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);
+
+	Vector4f base_colour = Vector4f(1, 1, 1, 1);
+
+	m_carTexture = RendererDX11::Get()->LoadTexture(L"Lamborginhi_Aventador_diffuse.png");
+	BasicMeshPtr car_geometry = this->generateOBJMesh(L"Lamborginhi_Aventador_triangles.obj", base_colour);
+	MaterialPtr car_material = this->createLitTexturedMaterial();
+
+	setupMaterialProperties(car_material);
+	setLights2Material(car_material);
+
+	applyTexture2Material(car_material, m_carTexture);
+	m_carActor = new GeometryActor();
+	m_carActor->GetBody()->SetGeometry(car_geometry);
+	m_carActor->GetBody()->SetMaterial(car_material);
+	m_carActor->GetBody()->Position() = Vector3f(75.0f, 0.0f, 75.0f);
+	m_carActor->GetBody()->Scale() = Vector3f(0.1f, 0.1f, 0.1f);
+	this->m_pScene->AddActor(m_carActor);
 
 }
 
@@ -566,6 +571,29 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 	material->Parameters.SetVectorParameter(L"PointLightRange", PointLightRange);
 }
 
+
+void LJMULevelDemo::updateLightSources()
+{
+
+	// Spot Light properties
+	float spotlightRotationSpeed = 0.5f;
+	float xdir = sin(m_totalPlayTime * spotlightRotationSpeed);
+	float ydir = -0.1f;
+	float zdir = cos(m_totalPlayTime * spotlightRotationSpeed);
+
+	Vector3f spotLightDir = Vector3f(xdir, ydir, zdir);
+	spotLightDir.Normalize();
+	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
+
+}
+
+void LJMULevelDemo::applyLights2AllMaterials()
+{
+	MaterialPtr material = m_carActor->GetBody()->GetMaterial();
+	setLights2Material(material);
+	m_carActor->GetBody()->SetMaterial(material);
+}
+
 MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)
 {
 	float ambient_constant = 0.001f;
@@ -583,4 +611,39 @@ MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)
 	material->Parameters.SetVectorParameter(L"SurfaceEmmisiveColour", emmisivity);
 	setLights2Material(material);
 	return material;
+}
+
+void LJMULevelDemo::applyTexture2Material(MaterialPtr material, ResourcePtr texture)
+{
+	material->Parameters.SetShaderResourceParameter(L"ColorTexture", texture);
+}
+
+BasicMeshPtr GenerateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour)
+{
+	FileSystem fs;
+	LJMUMeshOBJ* tmesh = new LJMUMeshOBJ(fs.GetModelsFolder() + pmeshname);
+	int tvertcount = tmesh->positions.size();
+
+	auto tia = std::make_shared < DrawExecutorDX11 < BasicVertexDX11::Vertex>>();
+	tia->SetLayoutElements(BasicVertexDX11::GetElementCount(), BasicVertexDX11::Elements);
+	tia->SetPrimitiveType(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	tia->SetMaxVertexCount(tvertcount);
+
+	BasicVertexDX11::Vertex tv;
+	tv.color = pmeshColour;
+
+	for (auto& tobject : tmesh->objects)
+	{
+		for (auto& tface : tobject.faces)
+		{
+			for (size_t i = 0; i < 3; ++i)
+			{
+				tv.position = tmesh->positions[tface.PositionIndices[i]];
+				tv.normal = tmesh->normals[tface.NormalIndices[i]];
+				tv.texcoords = tmesh->coords[tface.CoordIndices[i]];
+				tia->AddVertex(tv);
+			}
+		}
+	}
+	return tia;
 }

@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Application.h"
-
 #include "Win32RenderWindow.h"
 #include "RendererDX11.h"
-
 #include "ViewPerspective.h"
 
 //Hieroglyph Includes
@@ -18,8 +16,10 @@
 
 //LJMU Framework Includes
 #include "LJMUTextOverlay.h"
-
 #include "LJMUGeometryActor.h"
+
+#include <BasicVertexDX11.h>
+typedef std::shared_ptr<Glyph3::DrawExecutorDX11<Glyph3::BasicVertexDX11::Vertex>> BasicMeshPtr;
 
 namespace Glyph3
 {
@@ -138,8 +138,19 @@ namespace LJMUDX
 
 		void setupLightSources();
 		void setLights2Material(MaterialPtr material);
+
+
+		float m_totalPlayTime = 0;
+		void	updateLightSources();
+		void applyLights2AllMaterials();
 		MaterialPtr setupMaterialProperties(MaterialPtr material);
 
+		void applyTexture2Material(MaterialPtr material, ResourcePtr texture);
+
+		ResourcePtr m_carTexture;
+		/*Actor* m_carActor;*/
+
+		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
 	};
 
 }

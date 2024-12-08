@@ -155,6 +155,17 @@ namespace LJMUDX
 
 		MaterialPtr createLitTexturedMaterial();
 
+		struct Spotlight
+		{
+			Vector4f Direction;
+			Vector4f Colour;
+			Vector4f Position;
+			Vector4f Range;
+			Vector4f Focus;
+		};
+
+		std::vector<Spotlight> Spotlights;
+
 	};
 
 

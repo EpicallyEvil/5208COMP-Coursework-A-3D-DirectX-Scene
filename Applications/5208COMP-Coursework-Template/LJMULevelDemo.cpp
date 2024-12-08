@@ -87,13 +87,10 @@ void LJMULevelDemo::inputAssemblyStage()
 														Vector3f(1.0f, 0.0f, 0.0f),
 														Vector3f(0.0f, 0.0f, -1.0f),
 														Vector2f(m_platformWidth, m_platformLength));
-	//m_platformActor->UseTexturedMaterial(m_racetrackTexture);
-
 	setupMaterialProperties(m_platformActor->m_pLitTexturedMaterial);
 	setLights2Material(m_platformActor->m_pLitTexturedMaterial);
 	m_platformActor->UseLitTexturedMaterial(m_racetrackTexture);
 	m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
-
 	this->m_pScene->AddActor(m_platformActor);
 
 	PointLight* tlight = new PointLight();
@@ -104,11 +101,11 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_pScene->AddLight(tlight);
 
 	m_carActor = new GeometryActor();
-	m_carActor->SetColor(Vector4f(0.0f, 1.0f, 0.0f, 1.0f)); //Green
-	m_carActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(4.0f, 8.0f, 12.0f));
-	m_carActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
-
-	this->m_pScene->AddActor(m_carActor);
+	//-------------------------------<<<<<This seems to work for now so will leave it as is>>>>>-------------------------------------------
+	//m_carActor->SetColor(Vector4f(0.0f, 1.0f, 0.0f, 1.0f)); <<<<<This seems to work for now so will leave it as is>>>>>
+	//m_carActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(4.0f, 8.0f, 12.0f));
+	//m_carActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
+	//this->m_pScene->AddActor(m_carActor);
 
 	const int NumberOfCheckpoints = 85;
 	Vector3f checkpointCoords[NumberOfCheckpoints] = {
@@ -274,7 +271,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	float treetrunklength = 8.0f;
 	float treetrunksize = 1.5f;
 
-	m_treeTrunkActor = new GeometryActor();
+	/*m_treeTrunkActor = new GeometryActor();
 	m_treeTrunkActor->UseTexturedMaterial(m_treetrunkTexture);
 	m_treeTrunkActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, treetrunklength, 1.0f));
 	m_treeTrunkActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
@@ -289,10 +286,9 @@ void LJMULevelDemo::inputAssemblyStage()
 	this->m_pScene->AddActor(m_treeTopActor);
 
 	Glyph3::Node3D* treeTopNode = m_treeTopActor->GetNode();
-	m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);
+	m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);*/
 
 	Vector4f base_colour = Vector4f(1, 1, 1, 1);
-
 	m_carTexture = RendererDX11::Get()->LoadTexture(L"Lamborginhi_Aventador_diffuse.png");
 	BasicMeshPtr car_geometry = this->generateOBJMesh(L"Lamborghini_Aventador_triangles.obj", base_colour);
 	MaterialPtr car_material = this->createLitTexturedMaterial();
@@ -307,6 +303,57 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_carActor->GetBody()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 	m_carActor->GetBody()->Scale() = Vector3f(0.05f, 0.05f, 0.05f);
 	this->m_pScene->AddActor(m_carActor);
+
+	// Array of tree coordinates
+	const int NumOfTrees = 15;
+	Vector3f treePos[NumOfTrees] = {
+		{ -24.80f, 0.0f, -56.32f },
+		{ 72.00f, 0.0f, -38.56f },
+		{ 94.72f, 0.0f, 30.08f },
+		{ 139.36f, 0.0f, 78.08f },
+		{ 239.52f, 0.0f, 102.08f },
+		{ 32.32f, 0.0f, 61.28f },
+		{ 96.64f, 0.0f, -98.56f },
+		{ 206.08f, 0.0f, -38.56f },
+		{ 244.96f, 0.0f, 19.52f },
+		{ -65.12f, 0.0f, -173.44f },
+		{ -190.88f, 0.0f, -217.12f },
+		{ -227.36f, 0.0f, -148.96f },
+		{ -208.64f, 0.0f, -6.40f },
+		{ -142.40f, 0.0f, 80.00f },
+		{ -48.80f, 0.0f, 133.76f }
+	};
+
+	// Loop through each tree coordinate
+	for (int i = 0; i < NumOfTrees; i++)
+	{
+
+		// Creating tree trunk actor
+		m_treeTrunkActor = new LJMUGeometryActor();
+		m_treeTrunkActor->SetColor(Vector4f(0.65f, 0.16f, 0.16f, 1.0f));
+		m_treeTrunkActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, treetrunklength, 1.0f));
+		m_treeTrunkActor->GetNode()->Position() = treePos[i] + Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
+		m_treeTrunkActor->GetNode()->Scale() = Vector3f(1, 1, 1) * treetrunksize;
+		m_treeTrunkActor->UseTexturedMaterial(m_treetrunkTexture);
+		this->m_pScene->AddActor(m_treeTrunkActor);
+
+		// Creating tree top actor
+		m_treeTopActor = new LJMUGeometryActor();
+		m_treeTopActor->SetColor(Vector4f(0.0f, 0.5f, 0.0f, 1.0f));
+		m_treeTopActor->DrawCylinder(Vector3f(0, 0, 0), Vector3f(0, 12, 0), 6, 0, 5, 20);
+		m_treeTopActor->DrawDisc(Vector3f(0, 0, 0), Vector3f(0, -1, 0), 6);
+		m_treeTopActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength, 0.0f);
+		m_treeTopActor->UseTexturedMaterial(m_leavesTexture);
+		this->m_pScene->AddActor(m_treeTopActor);
+
+		// Attaching the tree top to trunk
+		Glyph3::Node3D* treeTopNode = m_treeTopActor->GetNode();
+		m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);
+
+		Matrix3f trotation;
+		trotation.RotationZ(m_totalPlayTime);
+		m_treeTrunkActor->GetNode()->Rotation() *= trotation;
+	}
 
 }
 
@@ -364,6 +411,8 @@ void LJMULevelDemo::Update()
 		// hence time per frame is much larger than 10x 60fps
 		tpf = 1 / 60.0f;
 	}
+
+	m_totalPlayTime += tpf;
 
 	if (m_carState == 0)
 	{
@@ -456,9 +505,12 @@ void LJMULevelDemo::Update()
 	m_carLabelText->GetNode()->Position() = m_carActor->GetNode()->Position() + Vector3f(-5, 20, 0);
 
 	// Rotating   t r e e
-	Matrix3f trotation;
+	/*Matrix3f trotation;
 	trotation.RotationZ(tpf);
-	m_treeTrunkActor->GetNode()->Rotation() *= trotation;
+	m_treeTrunkActor->GetNode()->Rotation() *= trotation;*/
+
+	updateLightSources();
+	applyLights2AllMaterials();
 
 	//----------START RENDERING--------------------------------------------------------------
 
@@ -613,6 +665,9 @@ std::wstring LJMULevelDemo::outputFPSInfo()
 
 void LJMULevelDemo::setupLightSources()
 {
+
+	/*std::vector<Spotlight> Spotlights;*/
+
 	// Directional Light properties
 	Vector3f directionalLightDir = Vector3f(0.0f, -0.5f, 0.5f);
 	directionalLightDir.Normalize();
@@ -628,6 +683,7 @@ void LJMULevelDemo::setupLightSources()
 	// we cannot just set a scalar number to the GPU
 
 	// Spot Light properties
+	Spotlight spotlight1;
 	Vector3f spotLightDir = Vector3f(2.0f, -1.0f, 2.0f);
 	spotLightDir.Normalize();
 	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
@@ -639,6 +695,19 @@ void LJMULevelDemo::setupLightSources()
 	// We only use the first component of the 4F vector because
 	// we cannot just send a scalar number to the GPU
 
+	Spotlight spotlight2;
+	Vector3f spotLightDir = Vector3f(2.0f, -1.0f, 2.0f);
+	spotLightDir.Normalize();
+	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
+	SpotLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+	SpotLightPosition = Vector4f(-100.0f, 10.0f, -100.0f, 1.0f);
+	SpotLightRange = Vector4f(150.0f, 0.0f, 0.0f, 0.0f);
+	SpotLightFocus = Vector4f(20.0f, 0.0f, 0.0f, 0.0f);
+
+	// Add to collection
+	Spotlights.push_back(spotlight1);
+	Spotlights.push_back(spotlight2);
+
 }
 
 void LJMULevelDemo::setLights2Material(MaterialPtr material)
@@ -646,15 +715,18 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 	material->Parameters.SetVectorParameter(L"DirectionalLightColour", DirectionalLightColour);
 	material->Parameters.SetVectorParameter(L"DirectionalLightDirection", DirectionalLightDirection);
 
-	material->Parameters.SetVectorParameter(L"SpotLightColour", SpotLightColour);
-	material->Parameters.SetVectorParameter(L"SpotLightDirection", SpotLightDirection);
-	material->Parameters.SetVectorParameter(L"SpotLightPosition", SpotLightPosition);
-	material->Parameters.SetVectorParameter(L"SpotLightRange", SpotLightRange);
-	material->Parameters.SetVectorParameter(L"SpotLightFocus", SpotLightFocus);
-
 	material->Parameters.SetVectorParameter(L"PointLightColour", PointLightColour);
 	material->Parameters.SetVectorParameter(L"PointLightPosition", PointLightPosition);
 	material->Parameters.SetVectorParameter(L"PointLightRange", PointLightRange);
+
+	for (size_t i = 0; i < Spotlights.size(); ++i) {
+		std::wstring prefix = L"SpotLight" + std::to_wstring(i + 1);
+		material->Parameters.SetVectorParameter(L"SpotLightColour", SpotLightColour);
+		material->Parameters.SetVectorParameter(L"SpotLightDirection", SpotLightDirection);
+		material->Parameters.SetVectorParameter(L"SpotLightPosition", SpotLightPosition);
+		material->Parameters.SetVectorParameter(L"SpotLightRange", SpotLightRange);
+		material->Parameters.SetVectorParameter(L"SpotLightFocus", SpotLightFocus);
+	}
 }
 
 
@@ -780,3 +852,5 @@ MaterialPtr LJMULevelDemo::createLitTexturedMaterial() {
 
 	return material;
 }
+
+

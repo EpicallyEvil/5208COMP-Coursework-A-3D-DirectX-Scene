@@ -129,12 +129,20 @@ namespace LJMUDX
 		Vector4f				PointLightColour;
 		Vector4f				PointLightRange;
 
-		// Spot Light Source has POSITION, COLOUR, RANGE, DIRECTION and FOCUS
+		// Spotlight Source has POSITION, COLOUR, RANGE, DIRECTION and FOCUS
+		//Spotlight 1
 		Vector4f				SpotLightPosition;
 		Vector4f				SpotLightColour;
 		Vector4f				SpotLightRange;
 		Vector4f				SpotLightDirection;
 		Vector4f				SpotLightFocus;
+
+		//Spotlight2
+		Vector4f				SpotLight2Position;
+		Vector4f				SpotLight2Colour;
+		Vector4f				SpotLight2Range;
+		Vector4f				SpotLight2Direction;
+		Vector4f				SpotLight2Focus;
 
 		void setupLightSources();
 		void setLights2Material(MaterialPtr material);
@@ -154,18 +162,6 @@ namespace LJMUDX
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
 
 		MaterialPtr createLitTexturedMaterial();
-
-		struct Spotlight
-		{
-			Vector4f Direction;
-			Vector4f Colour;
-			Vector4f Position;
-			Vector4f Range;
-			Vector4f Focus;
-		};
-
-		std::vector<Spotlight> Spotlights;
-
 	};
 
 

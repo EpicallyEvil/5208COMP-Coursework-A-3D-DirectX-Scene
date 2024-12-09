@@ -34,6 +34,7 @@
 #include <FileSystem.h>
 
 #include <SamplerStateConfigDX11.h>
+#include <iomanip> // For std::fixed and std::setprecision for a cleaner hud presentation
 
 
 //Add a Using Directive to avoid typing Glyph3 for basic constructs
@@ -303,7 +304,6 @@ void LJMULevelDemo::inputAssemblyStage()
 	// Spawns a tree for each point in the array
 	for (int i = 0; i < NumOfTrees; i++)
 	{
-
 		// Creating tree trunk actor
 		m_treeTrunkActor = new LJMUGeometryActor();
 		m_treeTrunkActor->SetColor(Vector4f(0.65f, 0.16f, 0.16f, 1.0f));
@@ -331,6 +331,31 @@ void LJMULevelDemo::inputAssemblyStage()
 		trotation.RotationZ(m_totalPlayTime);
 		m_treeTrunkActor->GetNode()->Rotation() *= trotation;
 	}
+
+	// Container object
+	m_containerTexture = RendererDX11::Get()->LoadTexture(L"container.jpg");
+	BasicMeshPtr container_geometry = this->generateOBJMesh(L"container.obj", base_colour);
+	MaterialPtr container_material = this->createLitTexturedMaterial();
+
+	setupMaterialProperties(container_material);
+	setLights2Material(container_material);
+
+	// First container
+	applyTexture2Material(container_material, m_containerTexture);
+	m_containerActor = new GeometryActor();
+	m_containerActor->GetBody()->SetGeometry(container_geometry);
+	m_containerActor->GetBody()->SetMaterial(container_material);
+	m_containerActor->GetBody()->Position() = Vector3f(0.0f, 0.0f, -30.0f);
+	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
+	this->m_pScene->AddActor(m_containerActor);
+
+	// Second container
+	m_containerActor = new GeometryActor();
+	m_containerActor->GetBody()->SetGeometry(container_geometry);
+	m_containerActor->GetBody()->SetMaterial(container_material);
+	m_containerActor->GetBody()->Position() = Vector3f(20.0f, 0.0f, -30.0f);
+	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
+	this->m_pScene->AddActor(m_containerActor);
 
 }
 
@@ -496,8 +521,17 @@ void LJMULevelDemo::Update()
 	static Vector4f twhiteclr(1.0f, 1.0f, 1.0f, 1.0f);
 	static Vector4f tredclr(1.0f, 0.0f, 0.0f, 1.0f);
 
-	ttextpos.SetTranslation(Vector3f(tx, ty, 0.0f));
+	ttextpos.SetTranslation(Vector3f(tx, ty - 66, 0.0f));
 	this->m_pRender_text->writeText(this->outputFPSInfo(), ttextpos, twhiteclr);
+
+	ttextpos.SetTranslation(Vector3f(tx, ty -39, 0.0f));
+	this->m_pRender_text->writeText(this->outputCarSpeedInfo(), ttextpos, twhiteclr);
+
+	ttextpos.SetTranslation(Vector3f(tx, ty -12, 0.0f));
+	this->m_pRender_text->writeText(this->outputCarPosInfo(), ttextpos, twhiteclr);
+
+	ttextpos.SetTranslation(Vector3f(tx, ty + 15, 0.0f));
+	this->m_pRender_text->writeText(this->outputCarRotInfo(), ttextpos, twhiteclr);
 
 	//-----------------------2D Sprite Rendering------------------------------------------------
 	if(this->_sprite_visible)
@@ -512,10 +546,8 @@ void LJMULevelDemo::Update()
 	}
 
 	//----------START RENDERING--------------------------------------------------------------
-
 	this->m_pScene->Update(m_pTimer->Elapsed());
 	this->m_pScene->Render(this->m_pRenderer11);
-
 
 	//--------END RENDERING-------------------------------------------------------------
 	this->m_pRenderer11->Present(this->m_pWindow->GetHandle(), this->m_pWindow->GetSwapChain());
@@ -681,7 +713,7 @@ void LJMULevelDemo::setupLightSources()
 
 	// Point Light properties
 	PointLightPosition = Vector4f(0.0f, 30.0f, 0.0f, 1.0f);
-	PointLightColour = Vector4f(1.0f, 0.1f, 0.1f, 1.0f);
+	PointLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 	PointLightRange = Vector4f(60.0f, 0.0f, 0.0f, 0.0f);
 	// The range of the point light source is set to 30.0
 	// We only use the first component of the 4D vector because
@@ -720,36 +752,17 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 
 void LJMULevelDemo::updateLightSources()
 {
-	// Get the car's position and rotation
 	Vector3f carPosition = m_carActor->GetNode()->Position();
 	Matrix3f carRotation = m_carActor->GetNode()->Rotation();
-
-	// Update the spotlight direction to match the car's forward direction
 	m_currentCarDirection = carRotation * m_referenceCarDirection;
 	m_currentCarDirection.Normalize();
 
-	// Add a small offset to avoid perfect alignment with an axis
 	Vector3f adjustedDirection = m_currentCarDirection + Vector3f(0.1f, -0.1f, 0.0f);
 	adjustedDirection.Normalize();
 	SpotLightDirection = Vector4f(adjustedDirection, 1.0f);
 
-	// Update the spotlight position to match the car's position (left headlight)
+	// Updating the spotlight position to emulate the car's headlights
 	SpotLightPosition = Vector4f(carPosition.x - 1.0f, carPosition.y + 1.0f, carPosition.z, 1.0f);
-
-	// Ensure light color and intensity are maintained
-	SpotLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-	SpotLightFocus = Vector4f(60.0f, 0.0f, 0.0f, 0.0f);  // Increase focus for wider spread
-	SpotLightRange = Vector4f(200.0f, 0.0f, 0.0f, 0.0f);  // Increase range for better visibility
-
-	// Spotlight properties
-	/*float spotlightRotationSpeed = 0.5f;
-	float xdir = sin(m_totalPlayTime * spotlightRotationSpeed);
-	float ydir = -0.1f;
-	float zdir = cos(m_totalPlayTime * spotlightRotationSpeed);
-
-	Vector3f spotLightDir = Vector3f(xdir, ydir, zdir);
-	spotLightDir.Normalize();
-	SpotLightDirection = Vector4f(spotLightDir, 1.0f);*/
 }
 
 void LJMULevelDemo::applyLights2AllMaterials()
@@ -761,6 +774,10 @@ void LJMULevelDemo::applyLights2AllMaterials()
 	MaterialPtr material2 = m_platformActor->GetBody()->GetMaterial();
 	setLights2Material(material2);
 	m_platformActor->GetBody()->SetMaterial(material2);
+
+	MaterialPtr material3 = m_containerActor->GetBody()->GetMaterial();
+	setLights2Material(material3);
+	m_containerActor->GetBody()->SetMaterial(material3);
 }
 
 MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)
@@ -862,6 +879,44 @@ MaterialPtr LJMULevelDemo::createLitTexturedMaterial() {
 	material->Params[VT_PERSPECTIVE].pEffect = pEffect;
 
 	return material;
+}
+
+std::wstring LJMULevelDemo::outputCarSpeedInfo()
+{
+	std::wstringstream out;
+	out << L"Car Speed: " << m_carLinearSpeed << "MPH";
+	return out.str();
+}
+
+std::wstring LJMULevelDemo::outputCarPosInfo()
+{
+	std::wstringstream out;
+	// Getting the cars coords and storing them in a vector
+	Vector3f carPosition = m_carActor->GetNode()->Position();
+
+	// Converting the Vector values to printable integers on screen
+	out << L"Car Position: ("
+		<< static_cast<int>(carPosition.x) << L", "
+		<< static_cast<int>(carPosition.y) << L", "
+		<< static_cast<int>(carPosition.z) << L")";
+
+	return out.str();
+}
+
+std::wstring LJMULevelDemo::outputCarRotInfo()
+{
+	std::wstringstream out;
+	// Getting the cars rotation value and storing them in a matrix
+	Matrix3f carRotation = m_carActor->GetNode()->Rotation();
+
+	out << std::fixed << std::setprecision(2); // Setting floating point precision to 2 decimal places
+
+	// Printing just 2 of the 9 values from the matrix to represent the cars rotation value
+	out << L"Car Orientation: ("
+		  << carRotation(0, 0) << L", "  // Top left value in matrix
+		  << carRotation(0, 2) << L")";  // Top right value in matrix
+
+	return out.str();
 }
 
 

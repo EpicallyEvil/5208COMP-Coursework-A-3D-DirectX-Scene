@@ -67,6 +67,7 @@ namespace LJMUDX
 		void inputAssemblyStage();					//Stage to setup our VB and IB Info
 		
 		std::wstring outputFPSInfo();				//Convert the timer's Frames Per Second to a formatted string
+		
 
 	protected:
 		//-------------CLASS MEMBERS-----------------------------------------------
@@ -91,6 +92,7 @@ namespace LJMUDX
 		LJMUTextOverlay*        m_pRender_text;		//2D Output View - DirectX 11 Accelerated
 		Camera*					m_pCamera;			//Camera Object
 		GeometryActor* m_carActor; // Car Actor Object
+		GeometryActor* m_containerActor;
 
 		unsigned int _curr_obj;
 		std::vector<GeometryActor*>	_objects;
@@ -150,7 +152,6 @@ namespace LJMUDX
 		void setupLightSources();
 		void setLights2Material(MaterialPtr material);
 
-
 		float m_totalPlayTime = 0;
 		void	updateLightSources();
 		void applyLights2AllMaterials();
@@ -160,6 +161,7 @@ namespace LJMUDX
 
 
 		ResourcePtr m_carTexture;
+		ResourcePtr m_containerTexture;
 		/*Actor* m_carActor;*/
 
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
@@ -167,6 +169,11 @@ namespace LJMUDX
 		MaterialPtr createLitTexturedMaterial();
 
 		ResourcePtr _texture;
+
+		// Classes to read data to print to the onscreen HUD
+		std::wstring outputCarSpeedInfo();
+		std::wstring outputCarPosInfo();
+		std::wstring outputCarRotInfo();
 	};
 
 

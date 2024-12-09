@@ -363,12 +363,21 @@ void LJMULevelDemo::Initialize()
 											  25);	
 
 	this->m_pCamera->SetOverlayView(this->m_pRender_text);
-	
+
+	this->_obj_sprite_cam = new Camera();
+
+	this->_render_sprite = new LJMUSpriteOverlay(*this->m_pRenderer11,
+																								this->m_RenderTarget,
+																				std::wstring(L"CarSprite.png"));
+
+	this->_obj_sprite_cam->SetOverlayView(this->_render_sprite);
 
 	this->m_pCamera->SetProjectionParams(0.1f, 1000.0f, m_iscreenWidth / m_iscreenHeight,
 		                                   static_cast<float>(GLYPH_PI) / 2.0f);
 	
-	this->m_pScene->AddCamera(this->m_pCamera);	
+	this->m_pScene->AddCamera(this->m_pCamera);
+
+	this->m_pScene->AddCamera(this->_obj_sprite_cam);
 }
 
 ///////////////////////////////////
@@ -381,6 +390,7 @@ void LJMULevelDemo::Update()
 	EvtManager.ProcessEvent(EvtFrameStartPtr( new EvtFrameStart(this->m_pTimer->Elapsed())));
 
 	float tpf = m_pTimer->Elapsed();
+	m_totalPlayTime += tpf;
 
 	if (tpf > 10.0f / 60.0f)
 	{
@@ -388,8 +398,6 @@ void LJMULevelDemo::Update()
 		// hence time per frame is much larger than 10x 60fps
 		tpf = 1 / 60.0f;
 	}
-
-	m_totalPlayTime += tpf;
 
 	if (m_carState == 0)
 	{
@@ -482,10 +490,30 @@ void LJMULevelDemo::Update()
 	updateLightSources();
 	applyLights2AllMaterials();
 
+	//-----------------------2D Text Rendering------------------------------------------------
+
+	//-----------------------2D Sprite Rendering------------------------------------------------
+	if(this->_sprite_visible)
+	{
+		Matrix4f tspritexform = Matrix4f::Identity();
+		this->_render_sprite->drawSprite(tspritexform, Vector4f(1, 1, 1, 1));
+		/*Matrix4f tspritexform2 = Matrix4f::Identity();
+		tspritexform2.SetTranslation(Vector3f(50, 50, 0));
+		this->_render_sprite->drawSprite(tspritexform2, Vector4f(0, 1, 1, 1), this->_sprite_tex);*/
+	}
+
 	//----------START RENDERING--------------------------------------------------------------
+	//Matrix4f  ttextpos = Matrix4f::Identity();
+	//float tx = 30.0f; float ty = 30.0f;
+	//static Vector4f twhiteclr(1.0f, 1.0f, 1.0f, 1.0f);
+	//static Vector4f tredclr(1.0f, 0.0f, 0.0f, 1.0f);
+
+	//ttextpos.SetTranslation(Vector3f(tx, ty, 0.0f));
+	//this->_render_text->writeText(this->outputFPSInfo(), ttextpos, twhiteclr);
 
 	this->m_pScene->Update(m_pTimer->Elapsed());
 	this->m_pScene->Render(this->m_pRenderer11);
+
 
 	//--------END RENDERING-------------------------------------------------------------
 	this->m_pRenderer11->Present(this->m_pWindow->GetHandle(), this->m_pWindow->GetSwapChain());
@@ -575,6 +603,14 @@ bool LJMULevelDemo::HandleEvent(EventPtr pevent)
 	{
 		EvtKeyDownPtr tkey_down = std::static_pointer_cast<EvtKeyDown>(pevent);
 		unsigned int  tkeycode = tkey_down->GetCharacterCode();
+
+		if (tkeycode == '2')
+			this->_curr_obj++;
+		if (this->_curr_obj >= this->_objects.size())
+			this->_curr_obj = 0;
+
+		if (tkeycode == '3')
+			this->_sprite_visible = !this->_sprite_visible;
 	}
 	else if (e == SYSTEM_KEYBOARD_KEYUP)
 	{
@@ -658,15 +694,6 @@ void LJMULevelDemo::setupLightSources()
 	SpotLightPosition = Vector4f(100.0f, 10.0f, 100.0f, 1.0f);
 	SpotLightRange = Vector4f(150.0f, 0.0f, 0.0f, 0.0f);
 	SpotLightFocus = Vector4f(20.0f, 0.0f, 0.0f, 0.0f);
-
-	// Spotlight 2
-	Vector3f spotLight2Dir = Vector3f(2.0f, -1.0f, 2.0f);
-	spotLight2Dir.Normalize();
-	SpotLight2Direction = Vector4f(spotLight2Dir, 1.0f);
-	SpotLight2Colour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-	SpotLight2Position = Vector4f(-100.0f, 10.0f, -100.0f, 1.0f);
-	SpotLight2Range = Vector4f(150.0f, 0.0f, 0.0f, 0.0f);
-	SpotLight2Focus = Vector4f(20.0f, 0.0f, 0.0f, 0.0f);
 	// The focus of the spotlight source is set to 10.0
 	// We only use the first component of the 4F vector because
 	// we cannot just send a scalar number to the GPU
@@ -686,12 +713,6 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 	material->Parameters.SetVectorParameter(L"SpotLightPosition", SpotLightPosition);
 	material->Parameters.SetVectorParameter(L"SpotLightRange", SpotLightRange);
 	material->Parameters.SetVectorParameter(L"SpotLightFocus", SpotLightFocus);
-
-	material->Parameters.SetVectorParameter(L"SpotLight2Colour", SpotLight2Colour);
-	material->Parameters.SetVectorParameter(L"SpotLight2Direction", SpotLight2Direction);
-	material->Parameters.SetVectorParameter(L"SpotLight2Position", SpotLight2Position);
-	material->Parameters.SetVectorParameter(L"SpotLight2Range", SpotLight2Range);
-	material->Parameters.SetVectorParameter(L"SpotLight2Focus", SpotLight2Focus);
 }
 
 
@@ -707,11 +728,6 @@ void LJMULevelDemo::updateLightSources()
 	Vector3f spotLightDir = Vector3f(xdir, ydir, zdir);
 	spotLightDir.Normalize();
 	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
-
-
-	Vector3f spotLight2Dir = Vector3f(xdir, ydir, zdir);
-	spotLight2Dir.Normalize();
-	SpotLight2Direction = Vector4f(spotLight2Dir, 1.0f);
 }
 
 void LJMULevelDemo::applyLights2AllMaterials()

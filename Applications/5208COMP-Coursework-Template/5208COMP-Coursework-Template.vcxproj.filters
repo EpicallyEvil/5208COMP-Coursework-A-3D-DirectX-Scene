@@ -21,6 +21,9 @@
     <ClCompile Include="LJMUMeshOBJ.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LJMUSpriteOverlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LJMULevelDemo.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LJMUMeshOBJ.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LJMUSpriteOverlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

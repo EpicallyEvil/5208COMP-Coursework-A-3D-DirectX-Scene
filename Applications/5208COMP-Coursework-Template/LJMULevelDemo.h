@@ -16,6 +16,7 @@
 
 //LJMU Framework Includes
 #include "LJMUTextOverlay.h"
+#include "LJMUSpriteOverlay.h"
 #include "LJMUGeometryActor.h"
 
 #include <BasicVertexDX11.h>
@@ -91,6 +92,15 @@ namespace LJMUDX
 		Camera*					m_pCamera;			//Camera Object
 		GeometryActor* m_carActor; // Car Actor Object
 
+		unsigned int _curr_obj;
+		std::vector<GeometryActor*>	_objects;
+		LJMUTextOverlay* _render_text;
+
+		ResourcePtr _sprite_tex;
+		LJMUSpriteOverlay* _render_sprite;
+		Camera* _obj_sprite_cam;
+		bool _sprite_visible;
+
 		float					m_iscreenWidth = 1920.0f;
 		float					m_iscreenHeight = 1080.0f;
 
@@ -137,13 +147,6 @@ namespace LJMUDX
 		Vector4f				SpotLightDirection;
 		Vector4f				SpotLightFocus;
 
-		//Spotlight2
-		Vector4f				SpotLight2Position;
-		Vector4f				SpotLight2Colour;
-		Vector4f				SpotLight2Range;
-		Vector4f				SpotLight2Direction;
-		Vector4f				SpotLight2Focus;
-
 		void setupLightSources();
 		void setLights2Material(MaterialPtr material);
 
@@ -162,6 +165,8 @@ namespace LJMUDX
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
 
 		MaterialPtr createLitTexturedMaterial();
+
+		ResourcePtr _texture;
 	};
 
 

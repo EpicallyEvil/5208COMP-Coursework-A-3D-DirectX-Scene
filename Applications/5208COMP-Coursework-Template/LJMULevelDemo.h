@@ -99,7 +99,7 @@ namespace LJMUDX
 		ResourcePtr _sprite_tex;
 		LJMUSpriteOverlay* _render_sprite;
 		Camera* _obj_sprite_cam;
-		bool _sprite_visible;
+		bool _sprite_visible = true;
 
 		float					m_iscreenWidth = 1920.0f;
 		float					m_iscreenHeight = 1080.0f;

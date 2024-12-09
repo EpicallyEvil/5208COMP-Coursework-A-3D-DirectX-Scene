@@ -392,6 +392,9 @@ void LJMULevelDemo::Update()
 	float tpf = m_pTimer->Elapsed();
 	m_totalPlayTime += tpf;
 
+	updateLightSources();
+	applyLights2AllMaterials();
+
 	if (tpf > 10.0f / 60.0f)
 	{
 		// if this is triggered, most likely the user us debugging the code
@@ -487,29 +490,28 @@ void LJMULevelDemo::Update()
 	// Updating text above car
 	m_carLabelText->GetNode()->Position() = m_carActor->GetNode()->Position() + Vector3f(-5, 20, 0);
 
-	updateLightSources();
-	applyLights2AllMaterials();
-
 	//-----------------------2D Text Rendering------------------------------------------------
+	Matrix4f  ttextpos = Matrix4f::Identity();
+	float tx = 300.0f; float ty = 1030.0f;
+	static Vector4f twhiteclr(1.0f, 1.0f, 1.0f, 1.0f);
+	static Vector4f tredclr(1.0f, 0.0f, 0.0f, 1.0f);
+
+	ttextpos.SetTranslation(Vector3f(tx, ty, 0.0f));
+	this->m_pRender_text->writeText(this->outputFPSInfo(), ttextpos, twhiteclr);
 
 	//-----------------------2D Sprite Rendering------------------------------------------------
 	if(this->_sprite_visible)
 	{
 		Matrix4f tspritexform = Matrix4f::Identity();
+		tspritexform.SetTranslation(Vector3f(25, 985, 0));
 		this->_render_sprite->drawSprite(tspritexform, Vector4f(1, 1, 1, 1));
+
 		/*Matrix4f tspritexform2 = Matrix4f::Identity();
 		tspritexform2.SetTranslation(Vector3f(50, 50, 0));
 		this->_render_sprite->drawSprite(tspritexform2, Vector4f(0, 1, 1, 1), this->_sprite_tex);*/
 	}
 
 	//----------START RENDERING--------------------------------------------------------------
-	//Matrix4f  ttextpos = Matrix4f::Identity();
-	//float tx = 30.0f; float ty = 30.0f;
-	//static Vector4f twhiteclr(1.0f, 1.0f, 1.0f, 1.0f);
-	//static Vector4f tredclr(1.0f, 0.0f, 0.0f, 1.0f);
-
-	//ttextpos.SetTranslation(Vector3f(tx, ty, 0.0f));
-	//this->_render_text->writeText(this->outputFPSInfo(), ttextpos, twhiteclr);
 
 	this->m_pScene->Update(m_pTimer->Elapsed());
 	this->m_pScene->Render(this->m_pRenderer11);
@@ -718,16 +720,36 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 
 void LJMULevelDemo::updateLightSources()
 {
+	// Get the car's position and rotation
+	Vector3f carPosition = m_carActor->GetNode()->Position();
+	Matrix3f carRotation = m_carActor->GetNode()->Rotation();
 
-	// Spot Light properties
-	float spotlightRotationSpeed = 0.5f;
+	// Update the spotlight direction to match the car's forward direction
+	m_currentCarDirection = carRotation * m_referenceCarDirection;
+	m_currentCarDirection.Normalize();
+
+	// Add a small offset to avoid perfect alignment with an axis
+	Vector3f adjustedDirection = m_currentCarDirection + Vector3f(0.1f, -0.1f, 0.0f);
+	adjustedDirection.Normalize();
+	SpotLightDirection = Vector4f(adjustedDirection, 1.0f);
+
+	// Update the spotlight position to match the car's position (left headlight)
+	SpotLightPosition = Vector4f(carPosition.x - 1.0f, carPosition.y + 1.0f, carPosition.z, 1.0f);
+
+	// Ensure light color and intensity are maintained
+	SpotLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+	SpotLightFocus = Vector4f(60.0f, 0.0f, 0.0f, 0.0f);  // Increase focus for wider spread
+	SpotLightRange = Vector4f(200.0f, 0.0f, 0.0f, 0.0f);  // Increase range for better visibility
+
+	// Spotlight properties
+	/*float spotlightRotationSpeed = 0.5f;
 	float xdir = sin(m_totalPlayTime * spotlightRotationSpeed);
 	float ydir = -0.1f;
 	float zdir = cos(m_totalPlayTime * spotlightRotationSpeed);
 
 	Vector3f spotLightDir = Vector3f(xdir, ydir, zdir);
 	spotLightDir.Normalize();
-	SpotLightDirection = Vector4f(spotLightDir, 1.0f);
+	SpotLightDirection = Vector4f(spotLightDir, 1.0f);*/
 }
 
 void LJMULevelDemo::applyLights2AllMaterials()
@@ -735,6 +757,10 @@ void LJMULevelDemo::applyLights2AllMaterials()
 	MaterialPtr material = m_carActor->GetBody()->GetMaterial();
 	setLights2Material(material);
 	m_carActor->GetBody()->SetMaterial(material);
+
+	MaterialPtr material2 = m_platformActor->GetBody()->GetMaterial();
+	setLights2Material(material2);
+	m_platformActor->GetBody()->SetMaterial(material2);
 }
 
 MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)

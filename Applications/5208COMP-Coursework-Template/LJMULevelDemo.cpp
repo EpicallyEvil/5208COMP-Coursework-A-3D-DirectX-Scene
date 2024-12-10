@@ -97,9 +97,11 @@ void LJMULevelDemo::inputAssemblyStage()
 	// Skybox actor 
 	m_skyboxActor = new LJMUGeometryActor();
 	m_skyboxActor->SetColor(Vector4f(0.6f, 0.3f, 0.1f, 1.0f));
-	m_skyboxActor->DrawSphere(Vector3f(1.0f, 1.0f, 1.0f) , 64,   16,   16);
-	m_skyboxActor->UseTexturedMaterial(m_skyboxTexture);
-	m_skyboxActor->GetNode()->Position() = Vector3f(0.0f, 15.0f, 0.0f);
+	m_skyboxActor->DrawSphere(Vector3f(1.0f, 1.0f, 1.0f) , 450,   80,   80);
+	m_skyboxActor->UseSolidMaterial();
+	m_skyboxActor->LJMUGeometryActor::UseSkyboxMaterial(m_skyboxTexture);
+	//m_skyboxActor->UseTexturedMaterial(m_skyboxTexture);
+	m_skyboxActor->GetNode()->Position() = Vector3f(0.0f, -25.0f, 0.0f);
 	this->m_pScene->AddActor(m_skyboxActor);
 
 	PointLight* tlight = new PointLight();
@@ -723,9 +725,9 @@ void LJMULevelDemo::setupLightSources()
 	DirectionalLightColour = Vector4f(0.002f, 0.002f, 0.002f, 1.0f);
 
 	// Point Light properties
-	PointLightPosition = Vector4f(0.0f, 30.0f, 0.0f, 1.0f);
+	PointLightPosition = Vector4f(-140.0f, 30.0f, -155.0f, 1.0f);
 	PointLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-	PointLightRange = Vector4f(60.0f, 0.0f, 0.0f, 0.0f);
+	PointLightRange = Vector4f(90.0f, 0.0f, 0.0f, 0.0f);
 	// The range of the point light source is set to 30.0
 	// We only use the first component of the 4D vector because
 	// we cannot just set a scalar number to the GPU
@@ -929,5 +931,3 @@ std::wstring LJMULevelDemo::outputCarRotInfo()
 
 	return out.str();
 }
-
-

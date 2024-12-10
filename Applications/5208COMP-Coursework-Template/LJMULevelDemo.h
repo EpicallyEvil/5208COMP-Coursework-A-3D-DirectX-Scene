@@ -79,6 +79,7 @@ namespace LJMUDX
 		ResourcePtr				m_DepthTarget;		//Pointer to the GPU Render Target for Depth
 
 		LJMUGeometryActor* m_platformActor;
+		LJMUGeometryActor* m_skyboxActor;
 
 		float m_platformWidth = 256.0f;
 		float m_platformLength = 256.0f;
@@ -128,6 +129,7 @@ namespace LJMUDX
 		ResourcePtr m_racetrackTexture;
 		ResourcePtr m_treetrunkTexture;
 		ResourcePtr m_leavesTexture;
+		ResourcePtr m_skyboxTexture;
 
 		
 		// Variables to store light source properties

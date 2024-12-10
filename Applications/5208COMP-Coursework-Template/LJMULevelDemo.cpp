@@ -79,6 +79,9 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_racetrackTexture = RendererDX11::Get()->LoadTexture(L"racetrack.png");
 	m_treetrunkTexture = RendererDX11::Get()->LoadTexture(L"treetrunk.png");
 	m_leavesTexture = RendererDX11::Get()->LoadTexture(L"leaves.png");
+	m_skyboxTexture = RendererDX11::Get()->LoadTexture(L"sky1.png");
+
+	// Racetrack setup
 	m_platformActor = new LJMUGeometryActor();
 	m_platformActor->SetColor(Vector4f(0.6f, 0.3f, 0.1f, 1.0f));
 	m_platformActor->DrawRect( Vector3f(0.0f, 0.0f, 0.0f),
@@ -90,6 +93,14 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_platformActor->UseLitTexturedMaterial(m_racetrackTexture);
 	m_platformActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 	this->m_pScene->AddActor(m_platformActor);
+
+	// Skybox actor 
+	m_skyboxActor = new LJMUGeometryActor();
+	m_skyboxActor->SetColor(Vector4f(0.6f, 0.3f, 0.1f, 1.0f));
+	m_skyboxActor->DrawSphere(Vector3f(1.0f, 1.0f, 1.0f) , 64,   16,   16);
+	m_skyboxActor->UseTexturedMaterial(m_skyboxTexture);
+	m_skyboxActor->GetNode()->Position() = Vector3f(0.0f, 15.0f, 0.0f);
+	this->m_pScene->AddActor(m_skyboxActor);
 
 	PointLight* tlight = new PointLight();
 	tlight->GetSpecular() = Vector4f(1.2f, 1.2f, 1.2, 1);

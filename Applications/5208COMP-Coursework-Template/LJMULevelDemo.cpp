@@ -235,7 +235,7 @@ void LJMULevelDemo::inputAssemblyStage()
 		int endidx = (i + 1) % m_checkpoints.size();
 		Vector3f cylinderStartPoint = m_checkpoints[startidx] + Vector3f(0, 3, 0);
 		Vector3f cylinderEndPoint = m_checkpoints[endidx] + Vector3f(0, 3, 0);
-		pathSegmentActor->DrawCylinder(cylinderStartPoint, cylinderEndPoint, 0.4f, 0.4f); // Can comment out to make invis
+		//pathSegmentActor->DrawCylinder(cylinderStartPoint, cylinderEndPoint, 0.4f, 0.4f); // Can comment out to make invis
 		pathSegmentActor->UseSolidMaterial();
 		pathSegmentActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 		this->m_pScene->AddActor(pathSegmentActor);
@@ -371,6 +371,20 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_containerActor->GetBody()->Position() = Vector3f(20.0f, 0.0f, -30.0f);
 	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
 	this->m_pScene->AddActor(m_containerActor);
+
+	// Test object
+	m_lamppostTexture = RendererDX11::Get()->LoadTexture(L"light.jpg");
+	BasicMeshPtr lamppost_geometry = this->generateOBJMesh(L"light.obj", base_colour);
+	MaterialPtr lamppost_material = this->createLitTexturedMaterial();
+	setupMaterialProperties(lamppost_material);
+	setLights2Material(lamppost_material);
+	applyTexture2Material(lamppost_material, m_lamppostTexture);
+	m_lamppostActor = new GeometryActor();
+	m_lamppostActor->GetBody()->SetGeometry(lamppost_geometry);
+	m_lamppostActor->GetBody()->SetMaterial(lamppost_material);
+	m_lamppostActor->GetBody()->Position() = Vector3f(100.0f, 0.0f, 100.0f);
+	m_lamppostActor->GetBody()->Scale() = Vector3f(1.25f, 1.25f, 1.25f);
+	this->m_pScene->AddActor(m_lamppostActor);
 
 }
 
@@ -570,6 +584,53 @@ void LJMULevelDemo::Update()
 		this->_render_sprite->drawSprite(tspritexform, Vector4f(1, 1, 1, 1));
 	}
 
+	// Day night cycle code
+	{
+		float cycleDuration = 600.0f; // Total time for a complete cycle (day -> night -> day)
+		float progress = fmod(m_totalPlayTime, cycleDuration);
+
+		if (progress <= 120.0f)
+		{
+			// Day phase
+			DirectionalLightColour = Vector4f(0.07f, 0.07f, 0.07f, 1.0f);
+
+		}
+		else if (progress <= 240.0f)
+		{
+			// Transition to night
+			float normalizedProgress = (progress - 120.0f) / 120.0f;
+			DirectionalLightColour = Vector4f(
+				0.07f - normalizedProgress * (0.07f - 0.002f),
+				0.07f - normalizedProgress * (0.07f - 0.002f),
+				0.07f - normalizedProgress * (0.07f - 0.002f),
+				1.0f);
+
+
+		}
+		else if (progress <= 360.0f)
+		{
+			// Night phase
+			DirectionalLightColour = Vector4f(0.001f, 0.001f, 0.001f, 1.0f);
+
+		}
+		else if (progress <= 480.0f)
+		{
+			// Transition to day
+			float normalizedProgress = (progress - 360.0f) / 120.0f;
+			DirectionalLightColour = Vector4f(
+				0.002f + normalizedProgress * (0.07f - 0.002f),
+				0.002f + normalizedProgress * (0.07f - 0.002f),
+				0.002f + normalizedProgress * (0.07f - 0.002f),
+				1.0f);
+
+		}
+		else
+		{
+			// Day phase
+			DirectionalLightColour = Vector4f(0.07f, 0.07f, 0.07f, 1.0f);
+		}
+	}
+
 	//----------START RENDERING--------------------------------------------------------------
 	this->m_pScene->Update(m_pTimer->Elapsed());
 	this->m_pScene->Render(this->m_pRenderer11);
@@ -734,7 +795,7 @@ void LJMULevelDemo::setupLightSources()
 	Vector3f directionalLightDir = Vector3f(0.0f, -0.5f, 0.5f);
 	directionalLightDir.Normalize();
 	DirectionalLightDirection = Vector4f(directionalLightDir, 1.0f);
-	DirectionalLightColour = Vector4f(0.002f, 0.002f, 0.002f, 1.0f);
+	DirectionalLightColour = Vector4f(0.001f, 0.001f, 0.001f, 1.0f);
 
 	// Point Light properties
 	PointLightPosition = Vector4f(-140.0f, 30.0f, -155.0f, 1.0f);
@@ -756,6 +817,15 @@ void LJMULevelDemo::setupLightSources()
 	// The focus of the spotlight source is set to 10.0
 	// We only use the first component of the 4F vector because
 	// we cannot just send a scalar number to the GPU
+
+	// Spotlight 2
+	Vector3f spotLight2Dir = Vector3f(2.0f, -1.0f, 2.0f);
+	spotLight2Dir.Normalize();
+	SpotLight2Direction = Vector4f(spotLight2Dir, 1.0f);
+	SpotLight2Colour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+	SpotLight2Position = Vector4f(100.0f, 10.0f, 100.0f, 1.0f);
+	SpotLight2Range = Vector4f(150.0f, 0.0f, 0.0f, 0.0f);
+	SpotLight2Focus = Vector4f(20.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void LJMULevelDemo::setLights2Material(MaterialPtr material)
@@ -767,11 +837,17 @@ void LJMULevelDemo::setLights2Material(MaterialPtr material)
 	material->Parameters.SetVectorParameter(L"PointLightPosition", PointLightPosition);
 	material->Parameters.SetVectorParameter(L"PointLightRange", PointLightRange);
 
-	material->Parameters.SetVectorParameter(L"SpotLightColour", SpotLightColour);
-	material->Parameters.SetVectorParameter(L"SpotLightDirection", SpotLightDirection);
-	material->Parameters.SetVectorParameter(L"SpotLightPosition", SpotLightPosition);
-	material->Parameters.SetVectorParameter(L"SpotLightRange", SpotLightRange);
-	material->Parameters.SetVectorParameter(L"SpotLightFocus", SpotLightFocus);
+	material->Parameters.SetVectorParameter(L"SpotLight1Colour", SpotLightColour);
+	material->Parameters.SetVectorParameter(L"SpotLight1Direction", SpotLightDirection);
+	material->Parameters.SetVectorParameter(L"SpotLight1Position", SpotLightPosition);
+	material->Parameters.SetVectorParameter(L"SpotLight1Range", SpotLightRange);
+	material->Parameters.SetVectorParameter(L"SpotLight1Focus", SpotLightFocus);
+
+	material->Parameters.SetVectorParameter(L"SpotLight2Colour", SpotLight2Colour);
+	material->Parameters.SetVectorParameter(L"SpotLight2Direction", SpotLight2Direction);
+	material->Parameters.SetVectorParameter(L"SpotLight2Position", SpotLight2Position);
+	material->Parameters.SetVectorParameter(L"SpotLight2Range", SpotLight2Range);
+	material->Parameters.SetVectorParameter(L"SpotLight2Focus", SpotLight2Focus);
 }
 
 

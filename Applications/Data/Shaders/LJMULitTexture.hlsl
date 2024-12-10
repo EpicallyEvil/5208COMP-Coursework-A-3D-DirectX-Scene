@@ -29,12 +29,19 @@ cbuffer DirectionalLightInfo_6107COMP
 
 cbuffer SpotLightInfo_6107COMP
 {
-	float4 SpotLightColour;
-	float3 SpotLightPosition;
-	float3 SpotLightDirection;
-	float3 SpotLightRange;
-	float3 SpotLightFocus;
-};
+    float4 SpotLight1Colour;
+    float3 SpotLight1Position;
+    float3 SpotLight1Direction;
+    float3 SpotLight1Range;
+    float3 SpotLight1Focus;
+
+    // New second spotlight data
+    float4 SpotLight2Colour;
+    float3 SpotLight2Position;
+    float3 SpotLight2Direction;
+    float3 SpotLight2Range;
+    float3 SpotLight2Focus;
+}
 
 cbuffer SceneInfo_6107COMP
 {
@@ -97,26 +104,25 @@ float3 calculatePointLight(float3 surfaceNormal, float3 position)
 		return (PointLightAmbience + PointDiffuse + PointSpecular);
 }
 
-float3 calculateSpotLight(float3 surfaceNormal, float3 position)
+float3 calculateSpotLight(float3 surfaceNormal, float3 position, float4 colour, float3 spotPosition, float3 direction, float3 range, float3 focus)
 {
+    float spotDistance = distance(spotPosition, position);
+    float spotDistAtt = saturate(1 - spotDistance / range.x);
+    float3 spotlight2PixelVector = normalize(position - spotPosition);
+    float spotAngularAtt = saturate(pow(dot(spotlight2PixelVector, direction), focus.x));
 
-	float spotDistance = distance(SpotLightPosition, position);
-	float spotDistAtt = saturate(1 - spotDistance / SpotLightRange.x);
-	float3 spotlight2PixelVector = normalize(position - SpotLightPosition);
-		float spotAngularAtt = saturate(pow(dot(spotlight2PixelVector, SpotLightDirection), SpotLightFocus.x));
+    // Ambience
+    float3 SpotLightAmbience = colour.xyz * SurfaceConstants.x;
 
-	// Ambience
-	float3 SpotLightAmbience = SpotLightColour.xyz * SurfaceConstants.x;
+    // Diffuse
+    float3 SpotDiffuse = saturate(dot(surfaceNormal, -direction)) * spotDistAtt * spotAngularAtt * colour.xyz * SurfaceConstants.y;
 
-		// Diffuse
-		float3 SpotDiffuse = saturate(dot(surfaceNormal, -SpotLightDirection)) * spotDistAtt * spotAngularAtt * SpotLightColour.xyz * SurfaceConstants.y;
+    // Specular
+    float3 viewVector_s = normalize(position - ViewPosition.xyz);
+    float3 spotlightreflectVector = reflect(direction, surfaceNormal);
+    float3 SpotSpecular = pow(saturate(dot(spotlightreflectVector, -viewVector_s)), SurfaceConstants.w) * spotDistAtt * spotAngularAtt * colour.xyz * SurfaceConstants.z;
 
-		// Specular
-		float3 viewVector_s = normalize(position - ViewPosition.xyz);
-		float3 spotlightreflectVector = reflect(SpotLightDirection, surfaceNormal);
-		float3 SpotSpecular = pow(saturate(dot(spotlightreflectVector, -viewVector_s)), SurfaceConstants.w) * spotDistAtt * spotAngularAtt * SpotLightColour.xyz * SurfaceConstants.z;
-
-		return (SpotLightAmbience + SpotDiffuse + SpotSpecular);
+    return (SpotLightAmbience + SpotDiffuse + SpotSpecular);
 }
 
 VS_OUTPUT VSMAIN(in VS_INPUT input)
@@ -134,18 +140,29 @@ VS_OUTPUT VSMAIN(in VS_INPUT input)
 
 float4 PSMAIN(in VS_OUTPUT input) : SV_Target
 {
+    float3 normalVector = input.normal;
+    float3 worldPosition = input.worldPos.xyz;
 
-	float3 normalVector = input.normal;
+    float3 directionallightIntensity = calculateDirectionalLight(normalVector, worldPosition);
+    float3 pointlightIntensity = calculatePointLight(normalVector, worldPosition);
 
-	float3 worldPosition = input.worldPos.xyz;
+    // Calculate both spotlights
+    float3 spotlight1Intensity = calculateSpotLight(
+        normalVector, worldPosition,
+        SpotLight1Colour, SpotLight1Position,
+        SpotLight1Direction, SpotLight1Range, SpotLight1Focus
+    );
+    float3 spotlight2Intensity = calculateSpotLight(
+        normalVector, worldPosition,
+        SpotLight2Colour, SpotLight2Position,
+        SpotLight2Direction, SpotLight2Range, SpotLight2Focus
+    );
 
-	float3 directionallightIntensity = calculateDirectionalLight(normalVector, worldPosition);
-	float3 pointlightIntensity = calculatePointLight(normalVector, worldPosition);
-	float3 spotlightIntensity = calculateSpotLight(normalVector, worldPosition);
-	float3 lightIntensity3f = directionallightIntensity + pointlightIntensity + spotlightIntensity + SurfaceEmissiveColour.xyz;
-	float4 lightIntensity4f = float4(lightIntensity3f, 1);
+    float3 lightIntensity3f = directionallightIntensity + pointlightIntensity + spotlight1Intensity + spotlight2Intensity + SurfaceEmissiveColour.xyz;
+    float4 lightIntensity4f = float4(lightIntensity3f, 1);
 
-	float4 pixelcolour = ColorTexture.Sample(TextureSampler, input.tex) * lightIntensity4f;
+    float4 pixelcolour = ColorTexture.Sample(TextureSampler, input.tex) * lightIntensity4f;
 
-	return pixelcolour;
+    return pixelcolour;
 }
+

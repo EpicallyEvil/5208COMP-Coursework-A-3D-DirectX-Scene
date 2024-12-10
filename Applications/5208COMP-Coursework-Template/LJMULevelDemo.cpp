@@ -100,7 +100,6 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_skyboxActor->DrawSphere(Vector3f(1.0f, 1.0f, 1.0f) , 450,   80,   80);
 	m_skyboxActor->UseSolidMaterial();
 	m_skyboxActor->LJMUGeometryActor::UseSkyboxMaterial(m_skyboxTexture);
-	//m_skyboxActor->UseTexturedMaterial(m_skyboxTexture);
 	m_skyboxActor->GetNode()->Position() = Vector3f(0.0f, -25.0f, 0.0f);
 	this->m_pScene->AddActor(m_skyboxActor);
 
@@ -321,9 +320,9 @@ void LJMULevelDemo::inputAssemblyStage()
 		m_treeTrunkActor = new LJMUGeometryActor();
 		m_treeTrunkActor->SetColor(Vector4f(0.65f, 0.16f, 0.16f, 1.0f));
 		m_treeTrunkActor->DrawBox(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, treetrunklength, 1.0f));
-		m_treeTrunkActor->GetNode()->Position() = treePos[i] + Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
+		m_treeTrunkActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength * treetrunksize, 0.0f);
 		m_treeTrunkActor->GetNode()->Scale() = Vector3f(1, 1, 1) * treetrunksize;
-		m_treeTrunkActor->UseTexturedMaterial(m_treetrunkTexture);
+		m_treeTrunkActor->UseLitTexturedMaterial(m_treetrunkTexture);
 		this->m_pScene->AddActor(m_treeTrunkActor);
 
 		// Creating tree top actor
@@ -332,17 +331,20 @@ void LJMULevelDemo::inputAssemblyStage()
 		m_treeTopActor->DrawCylinder(Vector3f(0, 0, 0), Vector3f(0, 12, 0), 6, 0, 5, 20);
 		m_treeTopActor->DrawDisc(Vector3f(0, 0, 0), Vector3f(0, -1, 0), 6);
 		m_treeTopActor->GetNode()->Position() = Vector3f(0.0f, treetrunklength, 0.0f);
-		m_treeTopActor->UseTexturedMaterial(m_leavesTexture);
+		m_treeTopActor->UseLitTexturedMaterial(m_leavesTexture);
 		this->m_pScene->AddActor(m_treeTopActor);
 
 		// Attaching the tree top to trunk
 		Glyph3::Node3D* treeTopNode = m_treeTopActor->GetNode();
 		m_treeTrunkActor->GetNode()->AttachChild(treeTopNode);
 
-		// Animation code
-		Matrix3f trotation;
-		trotation.RotationZ(m_totalPlayTime);
-		m_treeTrunkActor->GetNode()->Rotation() *= trotation;
+		// Creating pivot point for tree for realistic tree sway
+		m_treeTrunkPivot = new Actor();
+		m_treeTrunkPivot->GetNode()->AttachChild(m_treeTrunkActor->GetNode());
+		m_treeTrunkPivot->GetNode()->Position() = treePos[i];
+		this->m_pScene->AddActor(m_treeTrunkPivot);
+
+		m_treeActor.push_back(m_treeTrunkPivot);
 	}
 
 	// Container object
@@ -525,6 +527,19 @@ void LJMULevelDemo::Update()
 		}
 	}
 
+	// Tree sway code
+	for (size_t i = 0; i < m_treeActor.size(); i++)
+	{
+		m_totalPlayTime += tpf;
+		Matrix3f trotation;
+		float rotationSpeed = 0.25;
+		float maxswayangle = 7.5 / 360.0 * GLYPH_PI; // 10 degrees
+
+		// calculate sway angle and applying rotation
+		trotation.RotationZ(cos(m_totalPlayTime * rotationSpeed) * maxswayangle);
+		m_treeActor[i]->GetNode()->Rotation() = trotation;
+	}
+
 	// Updating text above car
 	m_carLabelText->GetNode()->Position() = m_carActor->GetNode()->Position() + Vector3f(-5, 20, 0);
 
@@ -549,13 +564,10 @@ void LJMULevelDemo::Update()
 	//-----------------------2D Sprite Rendering------------------------------------------------
 	if(this->_sprite_visible)
 	{
+		// Rendering the sprite if sprite is visible
 		Matrix4f tspritexform = Matrix4f::Identity();
 		tspritexform.SetTranslation(Vector3f(25, 985, 0));
 		this->_render_sprite->drawSprite(tspritexform, Vector4f(1, 1, 1, 1));
-
-		/*Matrix4f tspritexform2 = Matrix4f::Identity();
-		tspritexform2.SetTranslation(Vector3f(50, 50, 0));
-		this->_render_sprite->drawSprite(tspritexform2, Vector4f(0, 1, 1, 1), this->_sprite_tex);*/
 	}
 
 	//----------START RENDERING--------------------------------------------------------------
@@ -791,6 +803,10 @@ void LJMULevelDemo::applyLights2AllMaterials()
 	MaterialPtr material3 = m_containerActor->GetBody()->GetMaterial();
 	setLights2Material(material3);
 	m_containerActor->GetBody()->SetMaterial(material3);
+
+	MaterialPtr material4 = m_containerActor->GetBody()->GetMaterial();
+	setLights2Material(material4);
+	m_treeTopActor->GetBody()->SetMaterial(material4);
 }
 
 MaterialPtr LJMULevelDemo::setupMaterialProperties(MaterialPtr material)

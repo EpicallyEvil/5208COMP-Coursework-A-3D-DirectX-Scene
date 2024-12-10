@@ -123,8 +123,10 @@ namespace LJMUDX
 		TextActor* m_carLabelText;
 
 		// Tree Object
-		GeometryActor* m_treeTrunkActor;
-		GeometryActor* m_treeTopActor;
+		LJMUGeometryActor* m_treeTrunkActor;
+		LJMUGeometryActor* m_treeTopActor;
+		Actor* m_treeTrunkPivot;
+		std::vector<Actor*> m_treeActor;
 
 		ResourcePtr m_racetrackTexture;
 		ResourcePtr m_treetrunkTexture;
@@ -177,6 +179,5 @@ namespace LJMUDX
 		std::wstring outputCarPosInfo();
 		std::wstring outputCarRotInfo();
 	};
-
 
 }

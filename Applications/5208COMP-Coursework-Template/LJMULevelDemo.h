@@ -95,6 +95,8 @@ namespace LJMUDX
 		GeometryActor* m_carActor; // Car Actor Object
 		GeometryActor* m_containerActor;
 		GeometryActor* m_lamppostActor;
+		GeometryActor* m_tirewallActor;
+		GeometryActor* m_treeStumpsActor;
 
 		unsigned int _curr_obj;
 		std::vector<GeometryActor*>	_objects;
@@ -175,6 +177,8 @@ namespace LJMUDX
 		ResourcePtr m_carTexture;
 		ResourcePtr m_containerTexture;
 		ResourcePtr m_lamppostTexture;
+		ResourcePtr m_tirewallTexture;
+		ResourcePtr m_treeStumpsTexture;
 		/*Actor* m_carActor;*/
 
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);

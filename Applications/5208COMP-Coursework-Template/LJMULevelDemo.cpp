@@ -310,9 +310,7 @@ void LJMULevelDemo::inputAssemblyStage()
 		{ 110, 0, 250},
 		{ 170, 0, 250},
 		{ 250, 0, 250},
-
 	};
-
 	// Spawns a tree for each point in the array
 	for (int i = 0; i < NumOfTrees; i++)
 	{
@@ -347,6 +345,68 @@ void LJMULevelDemo::inputAssemblyStage()
 		m_treeActor.push_back(m_treeTrunkPivot);
 	}
 
+	// Array of tires coordinates
+	const int NumOfTires = 10;
+	Vector3f tirePos[NumOfTires] = {
+		{ -250, 0, 200},
+		{ -190, 0, 200},
+		{ -130, 0, 200},
+		{ -70, 0, 200},
+		{ -10, 0, 200},
+		{ 50, 0, 200},
+		{ 110, 0, 200},
+		{ 170, 0, 200},
+		{ 250, 0, 200},
+	};
+	// Spawns a tirewall for each point in the array
+	for (int i = 0; i < NumOfTires; i++)
+	{
+		// Light object
+		m_tirewallTexture = RendererDX11::Get()->LoadTexture(L"tirewall.png");
+		BasicMeshPtr tirewall_geometry = this->generateOBJMesh(L"tirewall.obj", base_colour);
+		MaterialPtr tirewall_material = this->createLitTexturedMaterial();
+		setupMaterialProperties(tirewall_material);
+		setLights2Material(tirewall_material);
+		applyTexture2Material(tirewall_material, m_tirewallTexture);
+		m_tirewallActor = new GeometryActor();
+		m_tirewallActor->GetBody()->SetGeometry(tirewall_geometry);
+		m_tirewallActor->GetBody()->SetMaterial(tirewall_material);
+		m_tirewallActor->GetBody()->Position() = tirePos[i];
+		m_tirewallActor->GetBody()->Scale() = Vector3f(10.25f, 10.25f, 10.25f);
+		this->m_pScene->AddActor(m_tirewallActor);
+	}
+
+	// Array of tree_stump coordinates
+	const int NumOfStumps = 10;
+	Vector3f stumpsPos[NumOfStumps] = {
+		{ -250, 0, 150},
+		{ -190, 0, 150},
+		{ -130, 0, 150},
+		{ -70, 0, 150},
+		{ -10, 0, 150},
+		{ 50, 0, 150},
+		{ 110, 0, 150},
+		{ 170, 0, 150},
+		{ 250, 0, 150},
+	};
+	// Spawns a tirewall for each point in the array
+	for (int i = 0; i < NumOfStumps; i++)
+	{
+		// Light object
+		m_treeStumpsTexture = RendererDX11::Get()->LoadTexture(L"tree_stub.png");
+		BasicMeshPtr treeStumps_geometry = this->generateOBJMesh(L"tree_stub.obj", base_colour);
+		MaterialPtr treeStumps_material = this->createLitTexturedMaterial();
+		setupMaterialProperties(treeStumps_material);
+		setLights2Material(treeStumps_material);
+		applyTexture2Material(treeStumps_material, m_treeStumpsTexture);
+		m_treeStumpsActor = new GeometryActor();
+		m_treeStumpsActor->GetBody()->SetGeometry(treeStumps_geometry);
+		m_treeStumpsActor->GetBody()->SetMaterial(treeStumps_material);
+		m_treeStumpsActor->GetBody()->Position() = stumpsPos[i];
+		m_treeStumpsActor->GetBody()->Scale() = Vector3f(1.25f, 1.25f, 1.25f);
+		this->m_pScene->AddActor(m_treeStumpsActor);
+	}
+
 	// Container object
 	m_containerTexture = RendererDX11::Get()->LoadTexture(L"container.jpg");
 	BasicMeshPtr container_geometry = this->generateOBJMesh(L"container.obj", base_colour);
@@ -372,7 +432,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
 	this->m_pScene->AddActor(m_containerActor);
 
-	// Test object
+	// Light object
 	m_lamppostTexture = RendererDX11::Get()->LoadTexture(L"light.jpg");
 	BasicMeshPtr lamppost_geometry = this->generateOBJMesh(L"light.obj", base_colour);
 	MaterialPtr lamppost_material = this->createLitTexturedMaterial();
@@ -385,7 +445,6 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_lamppostActor->GetBody()->Position() = Vector3f(100.0f, 0.0f, 100.0f);
 	m_lamppostActor->GetBody()->Scale() = Vector3f(1.25f, 1.25f, 1.25f);
 	this->m_pScene->AddActor(m_lamppostActor);
-
 }
 
 ////////////////////////////////////

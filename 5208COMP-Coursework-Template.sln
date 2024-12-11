@@ -85,8 +85,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{587F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{6A716E19-9CB7-4EA3-BA02-637DEC53A689}"
 	ProjectSection(SolutionItems) = preProject
+		Applications\Data\Models\bush.obj = Applications\Data\Models\bush.obj
 		Applications\Data\Models\container.obj = Applications\Data\Models\container.obj
+		Applications\Data\Models\garage.obj = Applications\Data\Models\garage.obj
 		Applications\Data\Models\Lamborghini_Aventador_triangles.obj = Applications\Data\Models\Lamborghini_Aventador_triangles.obj
+		Applications\Data\Models\lamp.obj = Applications\Data\Models\lamp.obj
+		Applications\Data\Models\light.obj = Applications\Data\Models\light.obj
+		Applications\Data\Models\tirewall.obj = Applications\Data\Models\tirewall.obj
+		Applications\Data\Models\tree_stub.obj = Applications\Data\Models\tree_stub.obj
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Textures", "Textures", "{5E77C729-A9D1-48A3-B48B-64AEC7682A82}"

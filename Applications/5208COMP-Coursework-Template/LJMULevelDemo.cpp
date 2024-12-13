@@ -239,15 +239,15 @@ void LJMULevelDemo::inputAssemblyStage()
 		pathSegmentActor->UseSolidMaterial();
 		pathSegmentActor->GetNode()->Position() = Vector3f(0.0f, 0.0f, 0.0f);
 		this->m_pScene->AddActor(pathSegmentActor);
-
-		float carTextSize = 10.0f;
-		m_carLabelText = new TextActor();
-		m_carLabelText->SetColor(Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
-		m_carLabelText->SetText(L"Player 1");
-		m_carLabelText->SetLineJustification(LineJustification::RIGHT);
-		m_carLabelText->GetNode()->Scale() = Vector3f(1.0f, 1.0f, 1.0f) * carTextSize;
-		this->m_pScene->AddActor(m_carLabelText);
 	}
+
+	float carTextSize = 10.0f;
+	m_carLabelText = new TextActor();
+	m_carLabelText->SetColor(Vector4f(0.0f, 0.0f, 1.0f, 1.0f));
+	m_carLabelText->SetText(L"Player 1");
+	m_carLabelText->SetLineJustification(LineJustification::RIGHT);
+	m_carLabelText->GetNode()->Scale() = Vector3f(1.0f, 1.0f, 1.0f) * carTextSize;
+	this->m_pScene->AddActor(m_carLabelText);
 
 	m_currentCheckpointIndex = 0;
 	m_nextCheckpointIndex = m_currentCheckpointIndex + 1;
@@ -299,17 +299,22 @@ void LJMULevelDemo::inputAssemblyStage()
 	float treetrunksize = 1.5f;
 
 	// Array of tree coordinates
-	const int NumOfTrees = 10;
+	const int NumOfTrees = 14;
 	Vector3f treePos[NumOfTrees] = {
-		{ -250, 0, 250},
-		{ -190, 0, 250},
-		{ -130, 0, 250},
-		{ -70, 0, 250},
-		{ -10, 0, 250},
-		{ 50, 0, 250},
-		{ 110, 0, 250},
-		{ 170, 0, 250},
-		{ 250, 0, 250},
+		{ -239, 0, 113},
+		{ -163, 0, 211},
+		{ -125, 0, 128},
+		{ -90, 0, 211},
+		{ -43, 0, 155},
+
+		{ 220, 0, -220},
+		{ 86, 0, -214},
+		{ 215, 0, -117},
+		{ 123, 0, -129},
+		{ 243, 0, 8},
+		{ 170, 0, -79},
+		{ 19,  0, -170},
+		{ -17,  0, -234},
 	};
 	// Spawns a tree for each point in the array
 	for (int i = 0; i < NumOfTrees; i++)
@@ -345,54 +350,52 @@ void LJMULevelDemo::inputAssemblyStage()
 		m_treeActor.push_back(m_treeTrunkPivot);
 	}
 
-	// Array of tires coordinates
-	const int NumOfTires = 10;
-	Vector3f tirePos[NumOfTires] = {
-		{ -250, 0, 200},
-		{ -190, 0, 200},
-		{ -130, 0, 200},
-		{ -70, 0, 200},
-		{ -10, 0, 200},
-		{ 50, 0, 200},
-		{ 110, 0, 200},
-		{ 170, 0, 200},
-		{ 250, 0, 200},
+	// Array of bushes coordinates
+	const int NumOfBushes = 10;
+	Vector3f bushPos[NumOfBushes] = {
+		{-126, 0, 206},
+{-228, 0, 204},
+{-188, 0, 142},
+{-229, 0, 12},
+{-232, 0, -177},
+{-98, 0, -229},
+{-64, 0, -172},
+
+{69, 0, -145},
+{-201, 0, 84},
+{-140.0f, 0.0f, -155.0f},
 	};
-	// Spawns a tirewall for each point in the array
-	for (int i = 0; i < NumOfTires; i++)
+	// Spawns a bush for each point in the array
+	for (int i = 0; i < NumOfBushes; i++)
 	{
-		// Light object
-		m_tirewallTexture = RendererDX11::Get()->LoadTexture(L"tirewall.png");
-		BasicMeshPtr tirewall_geometry = this->generateOBJMesh(L"tirewall.obj", base_colour);
-		MaterialPtr tirewall_material = this->createLitTexturedMaterial();
-		setupMaterialProperties(tirewall_material);
-		setLights2Material(tirewall_material);
-		applyTexture2Material(tirewall_material, m_tirewallTexture);
-		m_tirewallActor = new GeometryActor();
-		m_tirewallActor->GetBody()->SetGeometry(tirewall_geometry);
-		m_tirewallActor->GetBody()->SetMaterial(tirewall_material);
-		m_tirewallActor->GetBody()->Position() = tirePos[i];
-		m_tirewallActor->GetBody()->Scale() = Vector3f(10.25f, 10.25f, 10.25f);
-		this->m_pScene->AddActor(m_tirewallActor);
+		// Bush object
+		m_bushTexture = RendererDX11::Get()->LoadTexture(L"bush.png");
+		BasicMeshPtr bush_geometry = this->generateOBJMesh(L"bush.obj", base_colour);
+		MaterialPtr bush_material = this->createLitTexturedMaterial();
+		setupMaterialProperties(bush_material);
+		setLights2Material(bush_material);
+		applyTexture2Material(bush_material, m_bushTexture);
+		m_bushActor = new GeometryActor();
+		m_bushActor->GetBody()->SetGeometry(bush_geometry);
+		m_bushActor->GetBody()->SetMaterial(bush_material);
+		m_bushActor->GetBody()->Position() = bushPos[i];
+		m_bushActor->GetBody()->Scale() = Vector3f(13.25f, 13.25f, 13.25f);
+		this->m_pScene->AddActor(m_bushActor);
 	}
 
 	// Array of tree_stump coordinates
-	const int NumOfStumps = 10;
+	const int NumOfStumps = 5;
 	Vector3f stumpsPos[NumOfStumps] = {
-		{ -250, 0, 150},
-		{ -190, 0, 150},
-		{ -130, 0, 150},
+		{ 177, 0, -194},
+		{ 119, 0, -159},
+		{ 102, 0, -97},
 		{ -70, 0, 150},
 		{ -10, 0, 150},
-		{ 50, 0, 150},
-		{ 110, 0, 150},
-		{ 170, 0, 150},
-		{ 250, 0, 150},
 	};
-	// Spawns a tirewall for each point in the array
+	// Spawns a tree_stump for each point in the array
 	for (int i = 0; i < NumOfStumps; i++)
 	{
-		// Light object
+		// tree_stump object
 		m_treeStumpsTexture = RendererDX11::Get()->LoadTexture(L"tree_stub.png");
 		BasicMeshPtr treeStumps_geometry = this->generateOBJMesh(L"tree_stub.obj", base_colour);
 		MaterialPtr treeStumps_material = this->createLitTexturedMaterial();
@@ -420,7 +423,7 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_containerActor = new GeometryActor();
 	m_containerActor->GetBody()->SetGeometry(container_geometry);
 	m_containerActor->GetBody()->SetMaterial(container_material);
-	m_containerActor->GetBody()->Position() = Vector3f(0.0f, 0.0f, -30.0f);
+	m_containerActor->GetBody()->Position() = Vector3f(-232, 0, -230);
 	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
 	this->m_pScene->AddActor(m_containerActor);
 
@@ -428,13 +431,27 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_containerActor = new GeometryActor();
 	m_containerActor->GetBody()->SetGeometry(container_geometry);
 	m_containerActor->GetBody()->SetMaterial(container_material);
-	m_containerActor->GetBody()->Position() = Vector3f(20.0f, 0.0f, -30.0f);
+	m_containerActor->GetBody()->Position() = Vector3f(-212, 0, -230);
 	m_containerActor->GetBody()->Scale() = Vector3f(0.06f, 0.06f, 0.06f);
 	this->m_pScene->AddActor(m_containerActor);
 
 	// Light object
-	m_lamppostTexture = RendererDX11::Get()->LoadTexture(L"light.jpg");
-	BasicMeshPtr lamppost_geometry = this->generateOBJMesh(L"light.obj", base_colour);
+	m_lightTexture = RendererDX11::Get()->LoadTexture(L"light.jpg");
+	BasicMeshPtr light_geometry = this->generateOBJMesh(L"light.obj", base_colour);
+	MaterialPtr light_material = this->createLitTexturedMaterial();
+	setupMaterialProperties(light_material);
+	setLights2Material(light_material);
+	applyTexture2Material(light_material, m_lightTexture);
+	m_lightActor = new GeometryActor();
+	m_lightActor->GetBody()->SetGeometry(light_geometry);
+	m_lightActor->GetBody()->SetMaterial(light_material);
+	m_lightActor->GetBody()->Position() = Vector3f(100.0f, 0.0f, 100.0f);
+	m_lightActor->GetBody()->Scale() = Vector3f(1.25f, 1.25f, 1.25f);
+	this->m_pScene->AddActor(m_lightActor);
+
+	// Lamppost object
+	m_lamppostTexture = RendererDX11::Get()->LoadTexture(L"lamp.png");
+	BasicMeshPtr lamppost_geometry = this->generateOBJMesh(L"lamp.obj", base_colour);
 	MaterialPtr lamppost_material = this->createLitTexturedMaterial();
 	setupMaterialProperties(lamppost_material);
 	setLights2Material(lamppost_material);
@@ -442,9 +459,38 @@ void LJMULevelDemo::inputAssemblyStage()
 	m_lamppostActor = new GeometryActor();
 	m_lamppostActor->GetBody()->SetGeometry(lamppost_geometry);
 	m_lamppostActor->GetBody()->SetMaterial(lamppost_material);
-	m_lamppostActor->GetBody()->Position() = Vector3f(100.0f, 0.0f, 100.0f);
-	m_lamppostActor->GetBody()->Scale() = Vector3f(1.25f, 1.25f, 1.25f);
+	m_lamppostActor->GetBody()->Position() = Vector3f(-140.0f, 0.0f, -155.0f);
+	m_lamppostActor->GetBody()->Scale() = Vector3f(100.25f, 100.25f, 100.25f);
 	this->m_pScene->AddActor(m_lamppostActor);
+
+	// Garage object
+	m_garageTexture = RendererDX11::Get()->LoadTexture(L"garage.png");
+	BasicMeshPtr garage_geometry = this->generateOBJMesh(L"garage.obj", base_colour);
+	MaterialPtr garage_material = this->createLitTexturedMaterial();
+	setupMaterialProperties(garage_material);
+	setLights2Material(garage_material);
+	applyTexture2Material(garage_material, m_garageTexture);
+	m_garageActor = new GeometryActor();
+	m_garageActor->GetBody()->SetGeometry(garage_geometry);
+	m_garageActor->GetBody()->SetMaterial(garage_material);
+	m_garageActor->GetBody()->Position() = Vector3f(-30.0f, 0.0f, -80.0f);
+	m_garageActor->GetBody()->Scale() = Vector3f(10.25f, 10.25f, 10.25f);
+	this->m_pScene->AddActor(m_garageActor);
+
+
+	// Tirewall object
+	m_tirewallTexture = RendererDX11::Get()->LoadTexture(L"tirewall.png");
+	BasicMeshPtr tirewall_geometry = this->generateOBJMesh(L"tirewall.obj", base_colour);
+	MaterialPtr tirewall_material = this->createLitTexturedMaterial();
+	setupMaterialProperties(tirewall_material);
+	setLights2Material(tirewall_material);
+	applyTexture2Material(tirewall_material, m_tirewallTexture);
+	m_tirewallActor = new GeometryActor();
+	m_tirewallActor->GetBody()->SetGeometry(tirewall_geometry);
+	m_tirewallActor->GetBody()->SetMaterial(tirewall_material);
+	m_tirewallActor->GetBody()->Position() = Vector3f(-40.0f, 0.0f, -83.0f);
+	m_tirewallActor->GetBody()->Scale() = Vector3f(10.25f, 10.25f, 10.25f);
+	this->m_pScene->AddActor(m_tirewallActor);
 }
 
 ////////////////////////////////////
@@ -652,7 +698,6 @@ void LJMULevelDemo::Update()
 		{
 			// Day phase
 			DirectionalLightColour = Vector4f(0.07f, 0.07f, 0.07f, 1.0f);
-
 		}
 		else if (progress <= 240.0f)
 		{
@@ -663,14 +708,11 @@ void LJMULevelDemo::Update()
 				0.07f - normalizedProgress * (0.07f - 0.002f),
 				0.07f - normalizedProgress * (0.07f - 0.002f),
 				1.0f);
-
-
 		}
 		else if (progress <= 360.0f)
 		{
 			// Night phase
 			DirectionalLightColour = Vector4f(0.001f, 0.001f, 0.001f, 1.0f);
-
 		}
 		else if (progress <= 480.0f)
 		{
@@ -681,7 +723,6 @@ void LJMULevelDemo::Update()
 				0.002f + normalizedProgress * (0.07f - 0.002f),
 				0.002f + normalizedProgress * (0.07f - 0.002f),
 				1.0f);
-
 		}
 		else
 		{
@@ -859,7 +900,7 @@ void LJMULevelDemo::setupLightSources()
 	// Point Light properties
 	PointLightPosition = Vector4f(-140.0f, 30.0f, -155.0f, 1.0f);
 	PointLightColour = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-	PointLightRange = Vector4f(90.0f, 0.0f, 0.0f, 0.0f);
+	PointLightRange = Vector4f(110.0f, 0.0f, 0.0f, 0.0f);
 	// The range of the point light source is set to 30.0
 	// We only use the first component of the 4D vector because
 	// we cannot just set a scalar number to the GPU

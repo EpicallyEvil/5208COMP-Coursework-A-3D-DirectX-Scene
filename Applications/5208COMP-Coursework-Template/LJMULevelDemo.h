@@ -5,6 +5,7 @@
 #include "RendererDX11.h"
 #include "ViewPerspective.h"
 
+
 //Hieroglyph Includes
 #include "Camera.h"
 #include "Scene.h"
@@ -92,11 +93,26 @@ namespace LJMUDX
 		ViewPerspective*		m_pRenderView;		//3D Output View - DirectX 11 Accelerated
 		LJMUTextOverlay*        m_pRender_text;		//2D Output View - DirectX 11 Accelerated
 		Camera*					m_pCamera;			//Camera Object
-		GeometryActor* m_carActor; // Car Actor Object
+
+		// Actors for all my objects in scene
+		GeometryActor* m_carActor;
 		GeometryActor* m_containerActor;
 		GeometryActor* m_lamppostActor;
 		GeometryActor* m_tirewallActor;
 		GeometryActor* m_treeStumpsActor;
+		GeometryActor* m_lightActor;
+		GeometryActor* m_bushActor;
+		GeometryActor* m_garageActor;
+
+		// Textures for the actors
+		ResourcePtr m_carTexture;
+		ResourcePtr m_containerTexture;
+		ResourcePtr m_lamppostTexture;
+		ResourcePtr m_tirewallTexture;
+		ResourcePtr m_treeStumpsTexture;
+		ResourcePtr m_lightTexture;
+		ResourcePtr m_bushTexture;
+		ResourcePtr m_garageTexture;
 
 		unsigned int _curr_obj;
 		std::vector<GeometryActor*>	_objects;
@@ -173,12 +189,6 @@ namespace LJMUDX
 
 		void applyTexture2Material(MaterialPtr material, ResourcePtr texture);
 
-
-		ResourcePtr m_carTexture;
-		ResourcePtr m_containerTexture;
-		ResourcePtr m_lamppostTexture;
-		ResourcePtr m_tirewallTexture;
-		ResourcePtr m_treeStumpsTexture;
 		/*Actor* m_carActor;*/
 
 		BasicMeshPtr generateOBJMesh(std::wstring pmeshname, Vector4f pmeshColour);
